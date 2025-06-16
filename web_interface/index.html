@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI创新药研发平台</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 30px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+            min-height: 80vh;
+        }
+
+        .sidebar {
+            background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%);
+            padding: 30px 20px;
+            color: white;
+        }
+
+        .sidebar h3 {
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+
+        .tool-list {
+            list-style: none;
+        }
+
+        .tool-item {
+            margin-bottom: 15px;
+            padding: 12px 15px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+        }
+
+        .tool-item:hover {
+            background: rgba(255,255,255,0.2);
+            border-left-color: #3498db;
+            transform: translateX(5px);
+        }
+
+        .tool-item.active {
+            background: #3498db;
+            border-left-color: #2980b9;
+        }
+
+        .tool-item i {
+            margin-right: 10px;
+            width: 20px;
+        }
+
+        .main-content {
+            padding: 30px;
+            overflow-y: auto;
+        }
+
+        .tool-panel {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .tool-panel.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .panel-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #ecf0f1;
+        }
+
+        .panel-header i {
+            font-size: 2rem;
+            color: #3498db;
+            margin-right: 15px;
+        }
+
+        .panel-header h2 {
+            font-size: 2rem;
+            color: #2c3e50;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #ecf0f1;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(52, 152, 219, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .results-container {
+            margin-top: 30px;
+            padding: 25px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            border-left: 5px solid #3498db;
+        }
+
+        .results-container h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        .molecule-card {
+            background: white;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .molecule-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+        }
+
+        .molecule-smiles {
+            font-family: 'Courier New', monospace;
+            background: #ecf0f1;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            word-break: break-all;
+        }
+
+        .property-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .property-item {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .property-label {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+            margin-bottom: 5px;
+        }
+
+        .property-value {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid #ecf0f1;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .workflow-builder {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+
+        .workflow-step {
+            background: white;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #3498db;
+            position: relative;
+        }
+
+        .workflow-step::after {
+            content: '↓';
+            position: absolute;
+            bottom: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 1.5rem;
+            color: #3498db;
+        }
+
+        .workflow-step:last-child::after {
+            display: none;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .status-success { background: #27ae60; }
+        .status-warning { background: #f39c12; }
+        .status-error { background: #e74c3c; }
+        .status-info { background: #3498db; }
+
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+                gap: 0;
+            }
+            
+            .sidebar {
+                order: 2;
+            }
+            
+            .main-content {
+                order: 1;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-flask"></i> AI创新药研发平台</h1>
+            <p>基于人工智能的分子设计与药物发现平台</p>
+        </div>
+
+        <div class="dashboard">
+            <div class="sidebar">
+                <h3><i class="fas fa-tools"></i> 核心工具</h3>
+                <ul class="tool-list">
+                    <li class="tool-item active" data-tool="molecular-generator">
+                        <i class="fas fa-atom"></i> AI分子生成器
+                    </li>
+                    <li class="tool-item" data-tool="schrodinger">
+                        <i class="fas fa-cube"></i> 薛定谔对接
+                    </li>
+                    <li class="tool-item" data-tool="admet">
+                        <i class="fas fa-heartbeat"></i> ADMET预测
+                    </li>
+                    <li class="tool-item" data-tool="md-simulator">
+                        <i class="fas fa-wave-square"></i> 分子动力学
+                    </li>
+                    <li class="tool-item" data-tool="torsion-scanner">
+                        <i class="fas fa-sync-alt"></i> 扭转能扫描
+                    </li>
+                    <li class="tool-item" data-tool="substructure-search">
+                        <i class="fas fa-search"></i> 子结构检索
+                    </li>
+                    <li class="tool-item" data-tool="synthesis-assessor">
+                        <i class="fas fa-route"></i> 合成可及性
+                    </li>
+                    <li class="tool-item" data-tool="workflow">
+                        <i class="fas fa-project-diagram"></i> 工作流编排
+                    </li>
+                </ul>
+            </div>
+
+            <div class="main-content">
+                <!-- AI分子生成器面板 -->
+                <div class="tool-panel active" id="molecular-generator">
+                    <div class="panel-header">
+                        <i class="fas fa-atom"></i>
+                        <h2>AI分子生成器</h2>
+                    </div>
+                    
+                    <form id="molecular-generator-form">
+                        <div class="form-group">
+                            <label>目标分子量 (Da)</label>
+                            <input type="number" id="target-mw" value="400" min="100" max="800">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>目标LogP</label>
+                            <input type="number" id="target-logp" value="3.0" min="-5" max="8" step="0.1">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>氢键供体数</label>
+                            <input type="number" id="target-hbd" value="2" min="0" max="10">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>氢键受体数</label>
+                            <input type="number" id="target-hba" value="5" min="0" max="15">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>生成分子数量</label>
+                            <input type="number" id="num-molecules" value="10" min="1" max="100">
+                        </div>
+                        
+                        <button type="submit" class="btn">
+                            <i class="fas fa-magic"></i> 生成分子
+                        </button>
+                    </form>
+                    
+                    <div class="loading" id="molecular-loading">
+                        <div class="spinner"></div>
+                        <p>正在生成分子，请稍候...</p>
+                    </div>
+                    
+                    <div class="results-container" id="molecular-results" style="display: none;">
+                        <h3><i class="fas fa-flask"></i> 生成结果</h3>
+                        <div id="molecules-list"></div>
+                    </div>
+                </div>
+
+                <!-- 薛定谔对接面板 -->
+                <div class="tool-panel" id="schrodinger">
+                    <div class="panel-header">
+                        <i class="fas fa-cube"></i>
+                        <h2>薛定谔分子对接</h2>
+                    </div>
+                    
+                    <form id="docking-form">
+                        <div class="form-group">
+                            <label>配体SMILES</label>
+                            <input type="text" id="ligand-smiles" placeholder="CCc1ccc(cc1)C(=O)Nc2ccc(cc2)S(=O)(=O)N">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>受体PDB</label>
+                            <input type="text" id="receptor-pdb" placeholder="1ABC" value="1ABC">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>对接精度</label>
+                            <select id="docking-precision">
+                                <option value="HTVS">HTVS (高通量)</option>
+                                <option value="SP" selected>SP (标准精度)</option>
+                                <option value="XP">XP (超高精度)</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>最大构象数</label>
+                            <input type="number" id="max-poses" value="10" min="1" max="100">
+                        </div>
+                        
+                        <button type="submit" class="btn">
+                            <i class="fas fa-cube"></i> 开始对接
+                        </button>
+                    </form>
+                    
+                    <div class="loading" id="docking-loading">
+                        <div class="spinner"></div>
+                        <p>正在进行分子对接计算...</p>
+                    </div>
+                    
+                    <div class="results-container" id="docking-results" style="display: none;">
+                        <h3><i class="fas fa-chart-line"></i> 对接结果</h3>
+                        <div id="docking-data"></div>
+                    </div>
+                </div>
+
+                <!-- ADMET预测面板 -->
+                <div class="tool-panel" id="admet">
+                    <div class="panel-header">
+                        <i class="fas fa-heartbeat"></i>
+                        <h2>ADMET性质预测</h2>
+                    </div>
+                    
+                    <form id="admet-form">
+                        <div class="form-group">
+                            <label>分子SMILES</label>
+                            <input type="text" id="admet-smiles" placeholder="CCc1ccc(cc1)C(=O)Nc2ccc(cc2)S(=O)(=O)N">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>预测模型</label>
+                            <select id="prediction-models" multiple>
+                                <option value="absorption" selected>吸收 (Absorption)</option>
+                                <option value="distribution" selected>分布 (Distribution)</option>
+                                <option value="metabolism" selected>代谢 (Metabolism)</option>
+                                <option value="excretion" selected>排泄 (Excretion)</option>
+                                <option value="toxicity" selected>毒性 (Toxicity)</option>
+                            </select>
+                        </div>
+                        
+                        <button type="submit" class="btn">
+                            <i class="fas fa-heartbeat"></i> 预测ADMET
+                        </button>
+                    </form>
+                    
+                    <div class="loading" id="admet-loading">
+                        <div class="spinner"></div>
+                        <p>正在预测ADMET性质...</p>
+                    </div>
+                    
+                    <div class="results-container" id="admet-results" style="display: none;">
+                        <h3><i class="fas fa-chart-pie"></i> ADMET预测结果</h3>
+                        <div id="admet-data"></div>
+                    </div>
+                </div>
+
+                <!-- 工作流编排面板 -->
+                <div class="tool-panel" id="workflow">
+                    <div class="panel-header">
+                        <i class="fas fa-project-diagram"></i>
+                        <h2>工作流编排</h2>
+                    </div>
+                    
+                    <div class="workflow-builder">
+                        <h3>预设工作流：完整药物发现流程</h3>
+                        <div class="workflow-step">
+                            <h4><span class="status-indicator status-info"></span>步骤1: AI分子生成</h4>
+                            <p>基于目标性质生成候选分子</p>
+                        </div>
+                        <div class="workflow-step">
+                            <h4><span class="status-indicator status-info"></span>步骤2: 分子对接</h4>
+                            <p>评估分子与靶点的结合亲和力</p>
+                        </div>
+                        <div class="workflow-step">
+                            <h4><span class="status-indicator status-info"></span>步骤3: ADMET预测</h4>
+                            <p>预测药物代谢动力学性质</p>
+                        </div>
+                        <div class="workflow-step">
+                            <h4><span class="status-indicator status-info"></span>步骤4: 合成可及性评估</h4>
+                            <p>评估分子的合成难度和成本</p>
+                        </div>
+                    </div>
+                    
+                    <form id="workflow-form">
+                        <div class="form-group">
+                            <label>靶点信息</label>
+                            <input type="text" id="workflow-target" placeholder="EGFR" value="EGFR">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>目标分子量范围</label>
+                            <input type="text" id="workflow-mw-range" placeholder="300-500" value="300-500">
+                        </div>
+                        
+                        <button type="submit" class="btn">
+                            <i class="fas fa-play"></i> 运行工作流
+                        </button>
+                    </form>
+                    
+                    <div class="loading" id="workflow-loading">
+                        <div class="spinner"></div>
+                        <p>正在执行工作流，请稍候...</p>
+                    </div>
+                    
+                    <div class="results-container" id="workflow-results" style="display: none;">
+                        <h3><i class="fas fa-check-circle"></i> 工作流执行结果</h3>
+                        <div id="workflow-data"></div>
+                    </div>
+                </div>
+
+                <!-- 其他工具面板的占位符 -->
+                <div class="tool-panel" id="md-simulator">
+                    <div class="panel-header">
+                        <i class="fas fa-wave-square"></i>
+                        <h2>分子动力学模拟</h2>
+                    </div>
+                    <p>分子动力学模拟功能正在开发中...</p>
+                </div>
+
+                <div class="tool-panel" id="torsion-scanner">
+                    <div class="panel-header">
+                        <i class="fas fa-sync-alt"></i>
+                        <h2>扭转能扫描</h2>
+                    </div>
+                    <p>扭转能扫描功能正在开发中...</p>
+                </div>
+
+                <div class="tool-panel" id="substructure-search">
+                    <div class="panel-header">
+                        <i class="fas fa-search"></i>
+                        <h2>子结构检索</h2>
+                    </div>
+                    <p>子结构检索功能正在开发中...</p>
+                </div>
+
+                <div class="tool-panel" id="synthesis-assessor">
+                    <div class="panel-header">
+                        <i class="fas fa-route"></i>
+                        <h2>合成可及性评估</h2>
+                    </div>
+                    <p>合成可及性评估功能正在开发中...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // API配置
+        const API_BASE = 'http://localhost:8000';
+        const FAKE_API_BASE = 'http://localhost:5000';
+
+        // 工具切换功能
+        document.querySelectorAll('.tool-item').forEach(item => {
+            item.addEventListener('click', () => {
+                // 移除所有活动状态
+                document.querySelectorAll('.tool-item').forEach(i => i.classList.remove('active'));
+                document.querySelectorAll('.tool-panel').forEach(p => p.classList.remove('active'));
+                
+                // 添加活动状态
+                item.classList.add('active');
+                const toolId = item.getAttribute('data-tool');
+                document.getElementById(toolId).classList.add('active');
+            });
+        });
+
+        // AI分子生成器
+        document.getElementById('molecular-generator-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const loading = document.getElementById('molecular-loading');
+            const results = document.getElementById('molecular-results');
+            const moleculesList = document.getElementById('molecules-list');
+            
+            loading.classList.add('active');
+            results.style.display = 'none';
+            
+            const formData = {
+                target_properties: {
+                    molecular_weight: parseFloat(document.getElementById('target-mw').value),
+                    logp: parseFloat(document.getElementById('target-logp').value),
+                    hbd: parseInt(document.getElementById('target-hbd').value),
+                    hba: parseInt(document.getElementById('target-hba').value)
+                },
+                num_molecules: parseInt(document.getElementById('num-molecules').value)
+            };
+            
+            try {
+                const response = await fetch(`${API_BASE}/servers/molecular_generator/tools/generate_molecules`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    const molecules = data.result.molecules;
+                    moleculesList.innerHTML = molecules.map(mol => `
+                        <div class="molecule-card">
+                            <h4>分子 ${molecules.indexOf(mol) + 1}</h4>
+                            <div class="molecule-smiles">${mol.smiles}</div>
+                            <div class="property-grid">
+                                <div class="property-item">
+                                    <div class="property-label">分子量</div>
+                                    <div class="property-value">${mol.properties.molecular_weight}</div>
+                                </div>
+                                <div class="property-item">
+                                    <div class="property-label">LogP</div>
+                                    <div class="property-value">${mol.properties.logp}</div>
+                                </div>
+                                <div class="property-item">
+                                    <div class="property-label">生成评分</div>
+                                    <div class="property-value">${mol.generation_score}</div>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('');
+                    
+                    results.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('生成分子时发生错误，请检查服务器连接');
+            } finally {
+                loading.classList.remove('active');
+            }
+        });
+
+        // 薛定谔对接
+        document.getElementById('docking-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const loading = document.getElementById('docking-loading');
+            const results = document.getElementById('docking-results');
+            const dockingData = document.getElementById('docking-data');
+            
+            loading.classList.add('active');
+            results.style.display = 'none';
+            
+            const formData = {
+                ligand_smiles: document.getElementById('ligand-smiles').value,
+                receptor_pdb: document.getElementById('receptor-pdb').value,
+                precision: document.getElementById('docking-precision').value,
+                max_poses: parseInt(document.getElementById('max-poses').value)
+            };
+            
+            try {
+                const response = await fetch(`${API_BASE}/servers/schrodinger/tools/glide_docking`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    const result = data.result;
+                    const bestPose = result.best_pose;
+                    
+                    dockingData.innerHTML = `
+                        <div class="molecule-card">
+                            <h4>最佳对接结果</h4>
+                            <div class="property-grid">
+                                <div class="property-item">
+                                    <div class="property-label">对接评分</div>
+                                    <div class="property-value">${bestPose.docking_score}</div>
+                                </div>
+                                <div class="property-item">
+                                    <div class="property-label">Glide GScore</div>
+                                    <div class="property-value">${bestPose.glide_gscore}</div>
+                                </div>
+                                <div class="property-item">
+                                    <div class="property-label">结合亲和力估算</div>
+                                    <div class="property-value">${bestPose.binding_affinity_estimate.ki_estimate_nM} nM</div>
+                                </div>
+                                <div class="property-item">
+                                    <div class="property-label">类药性评分</div>
+                                    <div class="property-value">${bestPose.drug_likeness_score}</div>
+                                </div>
+                            </div>
+                            <h5>相互作用信息</h5>
+                            <div style="margin-top: 10px;">
+                                ${bestPose.interactions.map(int => `
+                                    <span style="background: #ecf0f1; padding: 5px 10px; margin: 2px; border-radius: 5px; display: inline-block;">
+                                        ${int.residue} (${int.type})
+                                    </span>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                    
+                    results.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('分子对接时发生错误，请检查服务器连接');
+            } finally {
+                loading.classList.remove('active');
+            }
+        });
+
+        // ADMET预测
+        document.getElementById('admet-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const loading = document.getElementById('admet-loading');
+            const results = document.getElementById('admet-results');
+            const admetData = document.getElementById('admet-data');
+            
+            loading.classList.add('active');
+            results.style.display = 'none';
+            
+            const formData = {
+                smiles: document.getElementById('admet-smiles').value,
+                prediction_models: Array.from(document.getElementById('prediction-models').selectedOptions).map(opt => opt.value)
+            };
+            
+            try {
+                const response = await fetch(`${API_BASE}/servers/admet_predictor/tools/predict_admet`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    const result = data.result;
+                    
+                    let admetHtml = `
+                        <div class="molecule-card">
+                            <h4>ADMET预测结果</h4>
+                            <div class="property-grid">
+                                <div class="property-item">
+                                    <div class="property-label">整体ADMET评分</div>
+                                    <div class="property-value">${result.overall_assessment.admet_score}</div>
+                                </div>
+                                <div class="property-item">
+                                    <div class="property-label">开发建议</div>
+                                    <div class="property-value" style="font-size: 0.9rem;">${result.overall_assessment.development_recommendation}</div>
+                                </div>
+                            </div>
+                    `;
+                    
+                    if (result.absorption) {
+                        admetHtml += `
+                            <h5>吸收性质</h5>
+                            <div class="property-grid">
+                                <div class="property-item">
+                                    <div class="property-label">Caco-2渗透性</div>
+                                    <div class="property-value">${result.absorption.caco2_permeability.value}</div>
+                                </div>
+                                <div class="property-item">
+                                    <div class="property-label">肠道吸收</div>
+                                    <div class="property-value">${result.absorption.human_intestinal_absorption.probability}</div>
+                                </div>
+                            </div>
+                        `;
+                    }
+                    
+                    if (result.toxicity) {
+                        admetHtml += `
+                            <h5>毒性预测</h5>
+                            <div class="property-grid">
+                                <div class="property-item">
+                                    <div class="property-label">Ames试验</div>
+                                    <div class="property-value">${result.toxicity.mutagenicity.ames_test}</div>
+                                </div>
+                                <div class="property-item">
+                                    <div class="property-label">肝毒性风险</div>
+                                    <div class="property-value">${result.toxicity.hepatotoxicity.risk_level}</div>
+                                </div>
+                            </div>
+                        `;
+                    }
+                    
+                    admetHtml += '</div>';
+                    admetData.innerHTML = admetHtml;
+                    results.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('ADMET预测时发生错误，请检查服务器连接');
+            } finally {
+                loading.classList.remove('active');
+            }
+        });
+
+        // 工作流执行
+        document.getElementById('workflow-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const loading = document.getElementById('workflow-loading');
+            const results = document.getElementById('workflow-results');
+            const workflowData = document.getElementById('workflow-data');
+            
+            loading.classList.add('active');
+            results.style.display = 'none';
+            
+            // 更新工作流状态指示器
+            const updateWorkflowStatus = (stepIndex, status) => {
+                const steps = document.querySelectorAll('.workflow-step .status-indicator');
+                if (steps[stepIndex]) {
+                    steps[stepIndex].className = `status-indicator status-${status}`;
+                }
+            };
+            
+            try {
+                // 模拟工作流执行过程
+                updateWorkflowStatus(0, 'warning');
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                updateWorkflowStatus(0, 'success');
+                
+                updateWorkflowStatus(1, 'warning');
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                updateWorkflowStatus(1, 'success');
+                
+                updateWorkflowStatus(2, 'warning');
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                updateWorkflowStatus(2, 'success');
+                
+                updateWorkflowStatus(3, 'warning');
+                await new Promise(resolve => setTimeout(resolve, 800));
+                updateWorkflowStatus(3, 'success');
+                
+                // 使用Fake API获取工作流结果
+                const response = await fetch(`${FAKE_API_BASE}/api/workflow/run`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        steps: [
+                            { id: 'generation', tool: 'molecular_generation' },
+                            { id: 'docking', tool: 'docking' },
+                            { id: 'admet', tool: 'admet' },
+                            { id: 'synthesis', tool: 'synthesis' }
+                        ]
+                    })
+                });
+                
+                const data = await response.json();
+                
+                workflowData.innerHTML = `
+                    <div class="molecule-card">
+                        <h4>工作流执行完成</h4>
+                        <p><strong>工作流ID:</strong> ${data.workflow_id}</p>
+                        <p><strong>执行时间:</strong> ${data.execution_time} 秒</p>
+                        <p><strong>状态:</strong> ${data.status}</p>
+                        
+                        <h5>各步骤结果摘要:</h5>
+                        <div class="property-grid">
+                            <div class="property-item">
+                                <div class="property-label">分子生成</div>
+                                <div class="property-value">生成评分: ${data.results.generation.generation_score}</div>
+                            </div>
+                            <div class="property-item">
+                                <div class="property-label">分子对接</div>
+                                <div class="property-value">对接评分: ${data.results.docking.docking_score}</div>
+                            </div>
+                            <div class="property-item">
+                                <div class="property-label">ADMET预测</div>
+                                <div class="property-value">ADMET评分: ${data.results.admet.admet_score}</div>
+                            </div>
+                            <div class="property-item">
+                                <div class="property-label">合成评估</div>
+                                <div class="property-value">状态: ${data.results.synthesis.status}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                results.style.display = 'block';
+                
+            } catch (error) {
+                console.error('Error:', error);
+                alert('工作流执行时发生错误，请检查服务器连接');
+                // 重置状态指示器
+                document.querySelectorAll('.workflow-step .status-indicator').forEach(indicator => {
+                    indicator.className = 'status-indicator status-info';
+                });
+            } finally {
+                loading.classList.remove('active');
+            }
+        });
+
+        // 页面加载完成后的初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('AI创新药研发平台已加载');
+            console.log('MCP Gateway:', API_BASE);
+            console.log('Fake API:', FAKE_API_BASE);
+        });
+    </script>
+</body>
+</html>
+
