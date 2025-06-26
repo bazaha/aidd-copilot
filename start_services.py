@@ -12,12 +12,13 @@ import os
 def start_fake_api():
     """启动Fake API服务"""
     print("Starting Fake API Server...")
-    fake_api_path = "/home/ubuntu/ai_drug_discovery_platform/fake_apis/fake_api_server.py"
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    fake_api_path = os.path.join(script_dir, "fake_apis", "fake_api_server.py")
     
     # 启动Fake API服务器
     process = subprocess.Popen([
         sys.executable, fake_api_path
-    ], cwd="/home/ubuntu/ai_drug_discovery_platform")
+    ], cwd=script_dir)
     
     return process
 
@@ -26,12 +27,13 @@ async def start_mcp_gateway():
     print("Starting MCP Gateway...")
     
     # 添加项目路径到Python路径
-    sys.path.insert(0, "/home/ubuntu/ai_drug_discovery_platform")
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    sys.path.insert(0, script_dir)
     
     from mcp_servers.manager import mcp_manager
     
     # 启动MCP网关
-    await mcp_manager.start_server(host="0.0.0.0", port=8000)
+    await mcp_manager.start_server(host="0.0.0.0", port=8088)
 
 def main():
     """主函数"""

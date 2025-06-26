@@ -90,7 +90,8 @@ def generate_compounds():
                 "logp": round(random.uniform(-1, 5), 2),
                 "hbd": random.randint(0, 5),
                 "hba": random.randint(0, 10),
-                "tpsa": round(random.uniform(20, 140), 2)
+                "tpsa": round(random.uniform(20, 140), 2),
+                "rotatable_bonds": random.randint(0, 12)
             },
             "generation_score": round(random.uniform(0.6, 0.95), 3),
             "novelty_score": round(random.uniform(0.5, 0.9), 3)
@@ -182,6 +183,19 @@ def predict_admet():
                 "hepatotoxicity": round(random.uniform(0.1, 0.8), 2),
                 "mutagenicity": random.choice(["positive", "negative"])
             }
+        },
+        "overall_assessment": {
+            "admet_score": round(random.uniform(0.3, 0.9), 2),
+            "absorption_score": round(random.uniform(0.4, 0.9), 2),
+            "distribution_score": round(random.uniform(0.4, 0.9), 2),
+            "metabolism_score": round(random.uniform(0.4, 0.9), 2),
+            "excretion_score": round(random.uniform(0.4, 0.9), 2),
+            "toxicity_score": round(random.uniform(0.4, 0.9), 2),
+            "development_recommendation": random.choice([
+                "Recommend for further development", 
+                "Proceed with caution", 
+                "Not recommended"
+            ])
         },
         "overall_score": round(random.uniform(0.3, 0.9), 2),
         "prediction_time": 1.5
@@ -335,5 +349,5 @@ if __name__ == '__main__':
     print("- POST /api/synthesis/analyze")
     print("- POST /api/workflow/run")
     
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=8288, debug=True)
 

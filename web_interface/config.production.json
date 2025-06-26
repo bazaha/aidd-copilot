@@ -1,0 +1,6 @@
+{
+  "API_BASE": "https://your-production-domain.com/api",
+  "FAKE_API_BASE": "https://your-production-domain.com/fake-api",
+  "OPENAI_API_KEY": "",
+  "OPENAI_API_BASE": "https://api.openai.com/v1"
+}

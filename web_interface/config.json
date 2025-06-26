@@ -1,0 +1,6 @@
+{
+  "API_BASE": "http://localhost:8088",
+  "FAKE_API_BASE": "http://localhost:8288",
+  "OPENAI_API_KEY": "",
+  "OPENAI_API_BASE": "https://api.openai.com/v1"
+}

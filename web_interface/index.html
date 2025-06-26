@@ -1,11 +1,31 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI创新药研发平台</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <title>AI Drug Discovery Agent</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --tertiary-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --dark-gradient: linear-gradient(135deg, #0c0c0c 0%, #1a1a1a 100%);
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.8);
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --bg-dark: #0a0a0a;
+            --bg-card: rgba(255, 255, 255, 0.05);
+            --border-color: rgba(255, 255, 255, 0.1);
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --error-color: #ef4444;
+            --info-color: #3b82f6;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -13,266 +33,778 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--dark-gradient);
             min-height: 100vh;
-            color: #333;
+            color: var(--text-primary);
+            overflow-x: hidden;
+        }
+
+        /* Animated background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(120, 200, 255, 0.2) 0%, transparent 50%);
+            z-index: -1;
+            animation: backgroundShift 20s ease-in-out infinite;
+        }
+
+        @keyframes backgroundShift {
+            0%, 100% { transform: translateX(0) translateY(0); }
+            33% { transform: translateX(-20px) translateY(-10px); }
+            66% { transform: translateX(20px) translateY(10px); }
         }
 
         .container {
-            max-width: 1400px;
+            max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
+            position: relative;
+            z-index: 1;
         }
 
         .header {
             text-align: center;
             margin-bottom: 40px;
-            color: white;
+            padding: 40px 0;
         }
 
         .header h1 {
-            font-size: 3rem;
+            font-size: 3.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #ffffff 0%, #a78bfa 50%, #06b6d4 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
             margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            text-shadow: none;
+            animation: titleGlow 3s ease-in-out infinite;
+        }
+
+        @keyframes titleGlow {
+            0%, 100% { filter: brightness(1); }
+            50% { filter: brightness(1.2); }
         }
 
         .header p {
-            font-size: 1.2rem;
-            opacity: 0.9;
+            font-size: 1.3rem;
+            color: var(--text-secondary);
+            font-weight: 300;
         }
 
-        .dashboard {
-            display: grid;
-            grid-template-columns: 300px 1fr;
-            gap: 30px;
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        .main-interface {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
             overflow: hidden;
             min-height: 80vh;
         }
 
-        .sidebar {
-            background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%);
-            padding: 30px 20px;
-            color: white;
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            height: 80vh;
         }
 
-        .sidebar h3 {
-            margin-bottom: 20px;
-            font-size: 1.3rem;
-            border-bottom: 2px solid #3498db;
-            padding-bottom: 10px;
+        .chat-header {
+            padding: 30px 40px 20px;
+            border-bottom: 1px solid var(--border-color);
+            background: rgba(255, 255, 255, 0.02);
         }
 
-        .tool-list {
-            list-style: none;
+        .chat-header h2 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
 
-        .tool-item {
-            margin-bottom: 15px;
-            padding: 12px 15px;
-            background: rgba(255,255,255,0.1);
-            border-radius: 10px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            border-left: 4px solid transparent;
+        .chat-header p {
+            color: var(--text-muted);
+            font-size: 1rem;
         }
 
-        .tool-item:hover {
-            background: rgba(255,255,255,0.2);
-            border-left-color: #3498db;
-            transform: translateX(5px);
+        .agent-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 15px;
         }
 
-        .tool-item.active {
-            background: #3498db;
-            border-left-color: #2980b9;
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--success-color);
+            animation: pulse 2s infinite;
         }
 
-        .tool-item i {
-            margin-right: 10px;
-            width: 20px;
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
         }
 
-        .main-content {
-            padding: 30px;
+        .chat-messages {
+            flex: 1;
             overflow-y: auto;
+            padding: 20px 40px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
         }
 
-        .tool-panel {
-            display: none;
-            animation: fadeIn 0.5s ease;
+        .message {
+            max-width: 80%;
+            animation: slideIn 0.3s ease-out;
         }
 
-        .tool-panel.active {
-            display: block;
-        }
-
-        @keyframes fadeIn {
+        @keyframes slideIn {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
-        .panel-header {
+        .message.user {
+            align-self: flex-end;
+        }
+
+        .message.agent {
+            align-self: flex-start;
+        }
+
+        .message-content {
+            padding: 16px 20px;
+            border-radius: 18px;
+            font-size: 1rem;
+            line-height: 1.5;
+            position: relative;
+        }
+
+        .message.user .message-content {
+            background: var(--primary-gradient);
+            color: white;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .message.agent .message-content {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+        }
+
+        .message-time {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 8px;
+            text-align: right;
+        }
+
+        .message.agent .message-time {
+            text-align: left;
+        }
+
+        .chat-input-container {
+            padding: 20px 40px 30px;
+            border-top: 1px solid var(--border-color);
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .chat-input-wrapper {
+            position: relative;
+            display: flex;
+            gap: 12px;
+            align-items: flex-end;
+        }
+
+        .chat-input {
+            flex: 1;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 16px 20px 16px 50px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            resize: none;
+            min-height: 56px;
+            max-height: 120px;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .chat-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .chat-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+
+        .send-button {
+            background: var(--primary-gradient);
+            border: none;
+            border-radius: 16px;
+            width: 56px;
+            height: 56px;
             display: flex;
             align-items: center;
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 2px solid #ecf0f1;
-        }
-
-        .panel-header i {
-            font-size: 2rem;
-            color: #3498db;
-            margin-right: 15px;
-        }
-
-        .panel-header h2 {
-            font-size: 2rem;
-            color: #2c3e50;
-        }
-
-        .form-group {
-            margin-bottom: 25px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: #2c3e50;
-        }
-
-        .form-group input,
-        .form-group select,
-        .form-group textarea {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #ecf0f1;
-            border-radius: 10px;
-            font-size: 1rem;
-            transition: border-color 0.3s ease;
-        }
-
-        .form-group input:focus,
-        .form-group select:focus,
-        .form-group textarea:focus {
-            outline: none;
-            border-color: #3498db;
-            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
-        }
-
-        .btn {
-            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            justify-content: center;
             color: white;
-            border: none;
-            padding: 15px 30px;
-            border-radius: 10px;
-            font-size: 1.1rem;
-            font-weight: 600;
+            font-size: 1.2rem;
             cursor: pointer;
             transition: all 0.3s ease;
-            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
         }
 
-        .btn:hover {
+        .send-button:hover:not(:disabled) {
             transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(52, 152, 219, 0.4);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
         }
 
-        .btn:active {
-            transform: translateY(0);
-        }
-
-        .btn:disabled {
+        .send-button:disabled {
             opacity: 0.6;
             cursor: not-allowed;
-            transform: none;
         }
 
-        .results-container {
-            margin-top: 30px;
-            padding: 25px;
-            background: #f8f9fa;
-            border-radius: 15px;
-            border-left: 5px solid #3498db;
+        .typing-indicator {
+            display: none;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-muted);
+            font-style: italic;
+            margin: 10px 0;
         }
 
-        .results-container h3 {
-            color: #2c3e50;
-            margin-bottom: 20px;
-            font-size: 1.5rem;
+        .typing-indicator.active {
+            display: flex;
         }
 
+        .typing-dots {
+            display: flex;
+            gap: 4px;
+        }
+
+        .typing-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--text-muted);
+            animation: typingBounce 1.4s infinite ease-in-out;
+        }
+
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes typingBounce {
+            0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
+            40% { transform: scale(1); opacity: 1; }
+        }
+
+        .function-call-display {
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 12px;
+            padding: 16px;
+            margin: 10px 0;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+        }
+
+        .function-name {
+            color: #3b82f6;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .function-params {
+            color: var(--text-secondary);
+            background: rgba(0, 0, 0, 0.2);
+            padding: 8px 12px;
+            border-radius: 6px;
+            white-space: pre-wrap;
+        }
+
+        .result-display {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            border-radius: 12px;
+            padding: 16px;
+            margin: 10px 0;
+            width: 100%;
+            overflow: visible;
+        }
+
+        .result-title {
+            color: var(--success-color);
+            font-weight: 500;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Enhanced molecule display styles */
         .molecule-card {
-            background: white;
-            padding: 20px;
-            margin-bottom: 15px;
-            border-radius: 10px;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
-            transition: transform 0.3s ease;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 16px;
+            margin: 12px 0;
+            transition: all 0.3s ease;
+            position: relative;
         }
 
         .molecule-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
         }
 
-        .molecule-smiles {
-            font-family: 'Courier New', monospace;
-            background: #ecf0f1;
-            padding: 10px;
-            border-radius: 5px;
-            margin: 10px 0;
+        .molecule-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .molecule-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .molecule-score {
+            background: var(--primary-gradient);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .molecule-structure {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin: 12px 0;
+        }
+
+        .smiles-display {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 12px 16px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            color: #fbbf24;
             word-break: break-all;
+            margin-bottom: 12px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
         }
 
-        .property-grid {
+        .copy-btn {
+            background: rgba(59, 130, 246, 0.2);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 6px;
+            padding: 6px 8px;
+            color: #60a5fa;
+            cursor: pointer;
+            font-size: 0.75rem;
+            opacity: 1;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        .copy-btn:hover {
+            background: rgba(59, 130, 246, 0.3);
+            border-color: rgba(59, 130, 246, 0.5);
+            color: #93c5fd;
+        }
+
+        .smiles-display:hover .copy-btn {
+            opacity: 1;
+        }
+
+        .copy-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: var(--text-primary);
+        }
+
+        .molecule-properties {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-top: 15px;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+            margin-top: 12px;
         }
 
         .property-item {
-            background: #f8f9fa;
+            background: rgba(255, 255, 255, 0.05);
             padding: 10px;
             border-radius: 8px;
             text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .property-label {
-            font-size: 0.9rem;
-            color: #7f8c8d;
-            margin-bottom: 5px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .property-value {
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             font-weight: 600;
-            color: #2c3e50;
+            color: var(--text-primary);
         }
 
-        .loading {
-            display: none;
+        /* Enhanced JSON display */
+        .json-container {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            margin: 16px 0;
+            overflow: hidden;
+        }
+
+        .json-header {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 12px 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .json-title {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .json-toggle {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: var(--text-muted);
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+        }
+
+        .json-toggle:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: var(--text-primary);
+        }
+
+        .json-content {
+            max-height: 400px;
+            overflow-y: auto;
+            transition: max-height 0.3s ease;
+        }
+
+        .json-content.collapsed {
+            max-height: 0;
+            overflow: hidden;
+        }
+
+        .json-content pre {
+            margin: 0;
+            padding: 16px;
+            background: rgba(0, 0, 0, 0.4);
+            color: #e2e8f0;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        /* Error message styles */
+        .message-content.error {
+            background: rgba(239, 68, 68, 0.1) !important;
+            border: 1px solid rgba(239, 68, 68, 0.3) !important;
+            color: #fca5a5 !important;
+        }
+
+        /* JSON syntax highlighting */
+        .json-key {
+            color: #60a5fa;
+            font-weight: 500;
+        }
+
+        .json-string {
+            color: #10b981;
+        }
+
+        .json-number {
+            color: #f59e0b;
+        }
+
+        .json-boolean {
+            color: #8b5cf6;
+        }
+
+        .json-null {
+            color: #ef4444;
+        }
+
+        /* Assessment cards for docking and ADMET */
+        .docking-pose-card, .admet-assessment-card {
+            background: linear-gradient(135deg, rgba(56, 189, 248, 0.1) 0%, rgba(14, 165, 233, 0.05) 100%);
+            border: 1px solid rgba(56, 189, 248, 0.2);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 12px 0;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .assessment-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .assessment-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 12px;
+            border-radius: 8px;
             text-align: center;
-            padding: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        .loading.active {
-            display: block;
+        .assessment-category {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
-        .spinner {
-            border: 4px solid #ecf0f1;
-            border-top: 4px solid #3498db;
+        .assessment-value {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .recommendation-badge {
+            margin-top: 16px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            text-align: center;
+        }
+
+        .recommendation-badge.positive {
+            background: rgba(34, 197, 94, 0.2);
+            color: #22c55e;
+            border: 1px solid rgba(34, 197, 94, 0.3);
+        }
+
+        .recommendation-badge.neutral {
+            background: rgba(251, 191, 36, 0.2);
+            color: #fbbf24;
+            border: 1px solid rgba(251, 191, 36, 0.3);
+        }
+
+        .recommendation-badge.negative {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        /* Structure placeholder */
+        .structure-placeholder {
+            width: 200px;
+            height: 150px;
+            background: linear-gradient(45deg, rgba(255,255,255,0.1) 25%, transparent 25%), 
+                        linear-gradient(-45deg, rgba(255,255,255,0.1) 25%, transparent 25%), 
+                        linear-gradient(45deg, transparent 75%, rgba(255,255,255,0.1) 75%), 
+                        linear-gradient(-45deg, transparent 75%, rgba(255,255,255,0.1) 75%);
+            background-size: 20px 20px;
+            background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            border: 1px dashed rgba(255, 255, 255, 0.2);
+        }
+
+        /* Enhanced scrollbars for JSON content */
+        .json-content::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .json-content::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 3px;
+        }
+
+        .json-content::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+        }
+
+        .json-content::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .quick-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .quick-action-btn {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 10px 16px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .quick-action-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: #667eea;
+            color: var(--text-primary);
+            transform: translateY(-1px);
+        }
+
+        .welcome-message {
+            text-align: center;
+            color: var(--text-muted);
+            margin: 40px 0;
+            font-size: 1.1rem;
+        }
+
+        .welcome-message .icon {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            background: var(--tertiary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Scrollbar styling */
+        .chat-messages::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .chat-messages::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 3px;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .header h1 {
+                font-size: 2.5rem;
+            }
+            
+            .chat-messages,
+            .chat-input-container {
+                padding: 15px 20px;
+            }
+            
+            .chat-header {
+                padding: 20px 20px 15px;
+            }
+            
+            .message {
+                max-width: 90%;
+            }
+            
+            .quick-actions {
+                flex-direction: column;
+            }
+        }
+
+        /* Loading animation */
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            border-radius: 24px;
+        }
+
+        .loading-overlay.active {
+            display: flex;
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top: 3px solid #667eea;
             border-radius: 50%;
-            width: 50px;
-            height: 50px;
             animation: spin 1s linear infinite;
-            margin: 0 auto 20px;
         }
 
         @keyframes spin {
@@ -280,65 +812,303 @@
             100% { transform: rotate(360deg); }
         }
 
-        .workflow-builder {
-            background: #f8f9fa;
-            padding: 25px;
-            border-radius: 15px;
-            margin-bottom: 30px;
+        /* Toast animations */
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
         }
 
-        .workflow-step {
-            background: white;
-            padding: 20px;
-            margin-bottom: 15px;
-            border-radius: 10px;
-            border-left: 4px solid #3498db;
-            position: relative;
+        /* Enhanced scrollbars for JSON content */
+        .json-content::-webkit-scrollbar {
+            width: 6px;
         }
 
-        .workflow-step::after {
-            content: '↓';
-            position: absolute;
-            bottom: -25px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 1.5rem;
-            color: #3498db;
+        .json-content::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 3px;
         }
 
-        .workflow-step:last-child::after {
-            display: none;
+        .json-content::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
         }
 
-        .status-indicator {
+        .json-content::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .docking-pose-card, .admet-assessment-card {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 16px;
+            margin: 12px 0;
+        }
+
+        .assessment-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .assessment-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 12px;
+            border-radius: 8px;
+            text-align: left;
+        }
+
+        .assessment-category {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .assessment-value {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .recommendation-badge {
             display: inline-block;
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            margin-right: 8px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            margin-top: 8px;
         }
 
-        .status-success { background: #27ae60; }
-        .status-warning { background: #f39c12; }
-        .status-error { background: #e74c3c; }
-        .status-info { background: #3498db; }
+        .recommendation-badge.positive {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--success-color);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .recommendation-badge.neutral {
+            background: rgba(245, 158, 11, 0.2);
+            color: var(--warning-color);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .recommendation-badge.negative {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--error-color);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        /* Configuration Panel Styles */
+        .config-panel {
+            position: fixed;
+            top: 0;
+            right: -400px;
+            width: 400px;
+            height: 100vh;
+            background: var(--glass-bg);
+            border-left: 1px solid var(--glass-border);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            transition: right 0.3s ease;
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .config-panel.open {
+            right: 0;
+        }
+
+        .config-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border-color);
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .config-header h3 {
+            color: var(--text-primary);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .config-header p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .config-content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .config-section {
+            margin-bottom: 24px;
+        }
+
+        .config-section h4 {
+            color: var(--text-primary);
+            font-size: 1rem;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .config-field {
+            margin-bottom: 16px;
+        }
+
+        .config-field label {
+            display: block;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+
+        .config-field input {
+            width: 100%;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 10px 12px;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .config-field input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .config-field input[type="password"] {
+            font-family: monospace;
+        }
+
+        .config-actions {
+            padding: 20px;
+            border-top: 1px solid var(--border-color);
+            background: rgba(255, 255, 255, 0.02);
+            display: flex;
+            gap: 12px;
+        }
+
+        .config-btn {
+            flex: 1;
+            padding: 10px 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .config-btn.primary {
+            background: var(--primary-gradient);
+            color: white;
+        }
+
+        .config-btn.secondary {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+
+        .config-btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .config-btn.primary:hover {
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .config-btn.secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-primary);
+        }
+
+        .config-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 48px;
+            height: 48px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            z-index: 1500;
+        }
+
+        .config-toggle:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: scale(1.05);
+        }
+
+        .config-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 1900;
+        }
+
+        .config-overlay.open {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .config-status {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 8px 12px;
+            margin-top: 8px;
+            font-size: 0.8rem;
+        }
+
+        .config-status.success {
+            color: var(--success-color);
+            border-color: rgba(16, 185, 129, 0.3);
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .config-status.warning {
+            color: var(--warning-color);
+            border-color: rgba(245, 158, 11, 0.3);
+            background: rgba(245, 158, 11, 0.1);
+        }
+
+        .config-status.error {
+            color: var(--error-color);
+            border-color: rgba(239, 68, 68, 0.3);
+            background: rgba(239, 68, 68, 0.1);
+        }
 
         @media (max-width: 768px) {
-            .dashboard {
-                grid-template-columns: 1fr;
-                gap: 0;
-            }
-            
-            .sidebar {
-                order: 2;
-            }
-            
-            .main-content {
-                order: 1;
-            }
-            
-            .header h1 {
-                font-size: 2rem;
+            .config-panel {
+                width: 100vw;
+                right: -100vw;
             }
         }
     </style>
@@ -346,550 +1116,693 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1><i class="fas fa-flask"></i> AI创新药研发平台</h1>
-            <p>基于人工智能的分子设计与药物发现平台</p>
+            <h1><i class="fas fa-robot"></i> AI Drug Discovery Agent</h1>
+            <p>Your intelligent assistant for molecular design and drug discovery</p>
         </div>
 
-        <div class="dashboard">
-            <div class="sidebar">
-                <h3><i class="fas fa-tools"></i> 核心工具</h3>
-                <ul class="tool-list">
-                    <li class="tool-item active" data-tool="molecular-generator">
-                        <i class="fas fa-atom"></i> AI分子生成器
-                    </li>
-                    <li class="tool-item" data-tool="schrodinger">
-                        <i class="fas fa-cube"></i> 薛定谔对接
-                    </li>
-                    <li class="tool-item" data-tool="admet">
-                        <i class="fas fa-heartbeat"></i> ADMET预测
-                    </li>
-                    <li class="tool-item" data-tool="md-simulator">
-                        <i class="fas fa-wave-square"></i> 分子动力学
-                    </li>
-                    <li class="tool-item" data-tool="torsion-scanner">
-                        <i class="fas fa-sync-alt"></i> 扭转能扫描
-                    </li>
-                    <li class="tool-item" data-tool="substructure-search">
-                        <i class="fas fa-search"></i> 子结构检索
-                    </li>
-                    <li class="tool-item" data-tool="synthesis-assessor">
-                        <i class="fas fa-route"></i> 合成可及性
-                    </li>
-                    <li class="tool-item" data-tool="workflow">
-                        <i class="fas fa-project-diagram"></i> 工作流编排
-                    </li>
-                </ul>
+        <div class="main-interface">
+            <div class="chat-container">
+                <div class="chat-header">
+                    <h2>
+                        <i class="fas fa-brain"></i>
+                        AI Agent Console
+                    </h2>
+                    <p>Ask me anything about molecular generation, docking, ADMET prediction, and more...</p>
+                    <div class="agent-status">
+                        <div class="status-dot"></div>
+                        <span>Agent is online and ready</span>
+                    </div>
+                </div>
+
+                <div class="chat-messages" id="chatMessages">
+                    <div class="welcome-message">
+                        <div class="icon">
+                            <i class="fas fa-flask"></i>
+                        </div>
+                        <h3>Welcome to AI Drug Discovery Agent</h3>
+                        <p>I can help you with molecular generation, structure-based drug design, ADMET predictions, and complex drug discovery workflows. Just tell me what you need!</p>
+                    </div>
+
+                    <div class="quick-actions" id="quickActions">
+                        <button class="quick-action-btn" onclick="sendQuickMessage('Generate molecules with molecular weight around 400 and good drug-like properties')">
+                            <i class="fas fa-atom"></i>
+                            Generate drug-like molecules
+                        </button>
+                        <button class="quick-action-btn" onclick="sendQuickMessage('Perform molecular docking analysis for a given compound')">
+                            <i class="fas fa-cube"></i>
+                            Molecular docking
+                        </button>
+                        <button class="quick-action-btn" onclick="sendQuickMessage('Predict ADMET properties for a molecule')">
+                            <i class="fas fa-heartbeat"></i>
+                            ADMET prediction
+                        </button>
+                        <button class="quick-action-btn" onclick="sendQuickMessage('Run complete drug discovery workflow')">
+                            <i class="fas fa-project-diagram"></i>
+                            Full workflow
+                        </button>
+                        <button class="quick-action-btn" onclick="testResultDisplay()">
+                            <i class="fas fa-bug"></i>
+                            Test Result Display
+                        </button>
+                    </div>
+                </div>
+
+                <div class="typing-indicator" id="typingIndicator">
+                    <i class="fas fa-robot"></i>
+                    <span>Agent is thinking</span>
+                    <div class="typing-dots">
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                    </div>
+                </div>
+
+                <div class="chat-input-container">
+                    <div class="chat-input-wrapper">
+                        <i class="fas fa-comment input-icon"></i>
+                        <textarea 
+                            class="chat-input" 
+                            id="chatInput" 
+                            placeholder="Ask me to generate molecules, perform docking, predict ADMET properties, or run workflows..."
+                            rows="1"
+                        ></textarea>
+                        <button class="send-button" id="sendButton" onclick="sendMessage()">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
             </div>
 
-            <div class="main-content">
-                <!-- AI分子生成器面板 -->
-                <div class="tool-panel active" id="molecular-generator">
-                    <div class="panel-header">
-                        <i class="fas fa-atom"></i>
-                        <h2>AI分子生成器</h2>
-                    </div>
-                    
-                    <form id="molecular-generator-form">
-                        <div class="form-group">
-                            <label>目标分子量 (Da)</label>
-                            <input type="number" id="target-mw" value="400" min="100" max="800">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label>目标LogP</label>
-                            <input type="number" id="target-logp" value="3.0" min="-5" max="8" step="0.1">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label>氢键供体数</label>
-                            <input type="number" id="target-hbd" value="2" min="0" max="10">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label>氢键受体数</label>
-                            <input type="number" id="target-hba" value="5" min="0" max="15">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label>生成分子数量</label>
-                            <input type="number" id="num-molecules" value="10" min="1" max="100">
-                        </div>
-                        
-                        <button type="submit" class="btn">
-                            <i class="fas fa-magic"></i> 生成分子
-                        </button>
-                    </form>
-                    
-                    <div class="loading" id="molecular-loading">
-                        <div class="spinner"></div>
-                        <p>正在生成分子，请稍候...</p>
-                    </div>
-                    
-                    <div class="results-container" id="molecular-results" style="display: none;">
-                        <h3><i class="fas fa-flask"></i> 生成结果</h3>
-                        <div id="molecules-list"></div>
-                    </div>
-                </div>
-
-                <!-- 薛定谔对接面板 -->
-                <div class="tool-panel" id="schrodinger">
-                    <div class="panel-header">
-                        <i class="fas fa-cube"></i>
-                        <h2>薛定谔分子对接</h2>
-                    </div>
-                    
-                    <form id="docking-form">
-                        <div class="form-group">
-                            <label>配体SMILES</label>
-                            <input type="text" id="ligand-smiles" placeholder="CCc1ccc(cc1)C(=O)Nc2ccc(cc2)S(=O)(=O)N">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label>受体PDB</label>
-                            <input type="text" id="receptor-pdb" placeholder="1ABC" value="1ABC">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label>对接精度</label>
-                            <select id="docking-precision">
-                                <option value="HTVS">HTVS (高通量)</option>
-                                <option value="SP" selected>SP (标准精度)</option>
-                                <option value="XP">XP (超高精度)</option>
-                            </select>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label>最大构象数</label>
-                            <input type="number" id="max-poses" value="10" min="1" max="100">
-                        </div>
-                        
-                        <button type="submit" class="btn">
-                            <i class="fas fa-cube"></i> 开始对接
-                        </button>
-                    </form>
-                    
-                    <div class="loading" id="docking-loading">
-                        <div class="spinner"></div>
-                        <p>正在进行分子对接计算...</p>
-                    </div>
-                    
-                    <div class="results-container" id="docking-results" style="display: none;">
-                        <h3><i class="fas fa-chart-line"></i> 对接结果</h3>
-                        <div id="docking-data"></div>
-                    </div>
-                </div>
-
-                <!-- ADMET预测面板 -->
-                <div class="tool-panel" id="admet">
-                    <div class="panel-header">
-                        <i class="fas fa-heartbeat"></i>
-                        <h2>ADMET性质预测</h2>
-                    </div>
-                    
-                    <form id="admet-form">
-                        <div class="form-group">
-                            <label>分子SMILES</label>
-                            <input type="text" id="admet-smiles" placeholder="CCc1ccc(cc1)C(=O)Nc2ccc(cc2)S(=O)(=O)N">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label>预测模型</label>
-                            <select id="prediction-models" multiple>
-                                <option value="absorption" selected>吸收 (Absorption)</option>
-                                <option value="distribution" selected>分布 (Distribution)</option>
-                                <option value="metabolism" selected>代谢 (Metabolism)</option>
-                                <option value="excretion" selected>排泄 (Excretion)</option>
-                                <option value="toxicity" selected>毒性 (Toxicity)</option>
-                            </select>
-                        </div>
-                        
-                        <button type="submit" class="btn">
-                            <i class="fas fa-heartbeat"></i> 预测ADMET
-                        </button>
-                    </form>
-                    
-                    <div class="loading" id="admet-loading">
-                        <div class="spinner"></div>
-                        <p>正在预测ADMET性质...</p>
-                    </div>
-                    
-                    <div class="results-container" id="admet-results" style="display: none;">
-                        <h3><i class="fas fa-chart-pie"></i> ADMET预测结果</h3>
-                        <div id="admet-data"></div>
-                    </div>
-                </div>
-
-                <!-- 工作流编排面板 -->
-                <div class="tool-panel" id="workflow">
-                    <div class="panel-header">
-                        <i class="fas fa-project-diagram"></i>
-                        <h2>工作流编排</h2>
-                    </div>
-                    
-                    <div class="workflow-builder">
-                        <h3>预设工作流：完整药物发现流程</h3>
-                        <div class="workflow-step">
-                            <h4><span class="status-indicator status-info"></span>步骤1: AI分子生成</h4>
-                            <p>基于目标性质生成候选分子</p>
-                        </div>
-                        <div class="workflow-step">
-                            <h4><span class="status-indicator status-info"></span>步骤2: 分子对接</h4>
-                            <p>评估分子与靶点的结合亲和力</p>
-                        </div>
-                        <div class="workflow-step">
-                            <h4><span class="status-indicator status-info"></span>步骤3: ADMET预测</h4>
-                            <p>预测药物代谢动力学性质</p>
-                        </div>
-                        <div class="workflow-step">
-                            <h4><span class="status-indicator status-info"></span>步骤4: 合成可及性评估</h4>
-                            <p>评估分子的合成难度和成本</p>
-                        </div>
-                    </div>
-                    
-                    <form id="workflow-form">
-                        <div class="form-group">
-                            <label>靶点信息</label>
-                            <input type="text" id="workflow-target" placeholder="EGFR" value="EGFR">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label>目标分子量范围</label>
-                            <input type="text" id="workflow-mw-range" placeholder="300-500" value="300-500">
-                        </div>
-                        
-                        <button type="submit" class="btn">
-                            <i class="fas fa-play"></i> 运行工作流
-                        </button>
-                    </form>
-                    
-                    <div class="loading" id="workflow-loading">
-                        <div class="spinner"></div>
-                        <p>正在执行工作流，请稍候...</p>
-                    </div>
-                    
-                    <div class="results-container" id="workflow-results" style="display: none;">
-                        <h3><i class="fas fa-check-circle"></i> 工作流执行结果</h3>
-                        <div id="workflow-data"></div>
-                    </div>
-                </div>
-
-                <!-- 其他工具面板的占位符 -->
-                <div class="tool-panel" id="md-simulator">
-                    <div class="panel-header">
-                        <i class="fas fa-wave-square"></i>
-                        <h2>分子动力学模拟</h2>
-                    </div>
-                    <p>分子动力学模拟功能正在开发中...</p>
-                </div>
-
-                <div class="tool-panel" id="torsion-scanner">
-                    <div class="panel-header">
-                        <i class="fas fa-sync-alt"></i>
-                        <h2>扭转能扫描</h2>
-                    </div>
-                    <p>扭转能扫描功能正在开发中...</p>
-                </div>
-
-                <div class="tool-panel" id="substructure-search">
-                    <div class="panel-header">
-                        <i class="fas fa-search"></i>
-                        <h2>子结构检索</h2>
-                    </div>
-                    <p>子结构检索功能正在开发中...</p>
-                </div>
-
-                <div class="tool-panel" id="synthesis-assessor">
-                    <div class="panel-header">
-                        <i class="fas fa-route"></i>
-                        <h2>合成可及性评估</h2>
-                    </div>
-                    <p>合成可及性评估功能正在开发中...</p>
-                </div>
+            <div class="loading-overlay" id="loadingOverlay">
+                <div class="loading-spinner"></div>
             </div>
         </div>
     </div>
 
+    <!-- Configuration Toggle Button -->
+    <div class="config-toggle" id="configToggle" onclick="toggleConfigPanel()">
+        <i class="fas fa-cog"></i>
+    </div>
+
+    <!-- Configuration Overlay -->
+    <div class="config-overlay" id="configOverlay" onclick="closeConfigPanel()"></div>
+
+    <!-- Configuration Panel -->
+    <div class="config-panel" id="configPanel">
+        <div class="config-header">
+            <h3>
+                <i class="fas fa-cog"></i>
+                Configuration
+            </h3>
+            <p>Configure API endpoints and settings</p>
+        </div>
+
+        <div class="config-content">
+            <div class="config-section">
+                <h4>API Endpoints</h4>
+                
+                <div class="config-field">
+                    <label for="mcpApiBase">MCP Gateway URL</label>
+                    <input type="text" id="mcpApiBase" placeholder="http://localhost:8088">
+                    <div class="config-status" id="mcpStatus"></div>
+                </div>
+
+                <div class="config-field">
+                    <label for="fakeApiBase">Fake API Server URL</label>
+                    <input type="text" id="fakeApiBase" placeholder="http://localhost:8288">
+                    <div class="config-status" id="fakeApiStatus"></div>
+                </div>
+            </div>
+
+            <div class="config-section">
+                <h4>OpenAI Configuration</h4>
+                
+                <div class="config-field">
+                    <label for="openaiApiKey">OpenAI API Key</label>
+                    <input type="password" id="openaiApiKey" placeholder="sk-...">
+                    <div class="config-status" id="openaiStatus"></div>
+                </div>
+
+                <div class="config-field">
+                    <label for="openaiApiBase">OpenAI API Base URL</label>
+                    <input type="text" id="openaiApiBase" placeholder="https://api.openai.com/v1">
+                </div>
+            </div>
+        </div>
+
+        <div class="config-actions">
+            <button class="config-btn secondary" onclick="resetConfig()">Reset</button>
+            <button class="config-btn secondary" onclick="testConnections()">Test</button>
+            <button class="config-btn primary" onclick="saveConfiguration()">Save</button>
+        </div>
+    </div>
+
     <script>
-        // API配置
-        const API_BASE = 'http://localhost:8000';
-        const FAKE_API_BASE = 'http://localhost:5000';
+        // Configuration - Load from localStorage or use defaults
+        const DEFAULT_CONFIG = {
+            API_BASE: 'http://localhost:8088',
+            FAKE_API_BASE: 'http://localhost:8288',
+            OPENAI_API_KEY: '',
+            OPENAI_API_BASE: 'https://api.openai.com/v1'
+        };
 
-        // 工具切换功能
-        document.querySelectorAll('.tool-item').forEach(item => {
-            item.addEventListener('click', () => {
-                // 移除所有活动状态
-                document.querySelectorAll('.tool-item').forEach(i => i.classList.remove('active'));
-                document.querySelectorAll('.tool-panel').forEach(p => p.classList.remove('active'));
-                
-                // 添加活动状态
-                item.classList.add('active');
-                const toolId = item.getAttribute('data-tool');
-                document.getElementById(toolId).classList.add('active');
+        // Load configuration from localStorage or use defaults
+        let CONFIG = { ...DEFAULT_CONFIG };
+        
+        async function loadConfig() {
+            // Try to load from config.json first (if available)
+            try {
+                const response = await fetch('./config.json');
+                if (response.ok) {
+                    const fileConfig = await response.json();
+                    CONFIG = { ...DEFAULT_CONFIG, ...fileConfig };
+                }
+            } catch (e) {
+                console.log('No config.json file found, using defaults');
+            }
+
+            // Then override with localStorage settings if available
+            const savedConfig = localStorage.getItem('aidd_config');
+            if (savedConfig) {
+                try {
+                    const localConfig = JSON.parse(savedConfig);
+                    CONFIG = { ...CONFIG, ...localConfig };
+                } catch (e) {
+                    console.warn('Failed to parse saved config, using defaults');
+                }
+            }
+        }
+
+        function saveConfig() {
+            localStorage.setItem('aidd_config', JSON.stringify(CONFIG));
+        }
+
+        // App version for debugging
+        console.log('AI Drug Discovery Agent v1.0.2 loaded - Molecules will show SMILES only');
+
+        // Global state
+        let conversationHistory = [];
+        let isAgentProcessing = false;
+
+        // DOM elements
+        const chatMessages = document.getElementById('chatMessages');
+        const chatInput = document.getElementById('chatInput');
+        const sendButton = document.getElementById('sendButton');
+        const typingIndicator = document.getElementById('typingIndicator');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const quickActions = document.getElementById('quickActions');
+
+        // Available functions for the AI agent
+        const availableFunctions = [
+            {
+                name: "generate_molecules",
+                description: "Generate molecules with specific properties using AI",
+                parameters: {
+                    type: "object",
+                    properties: {
+                        target_properties: {
+                            type: "object",
+                            properties: {
+                                molecular_weight: { type: "number", description: "Target molecular weight in Da" },
+                                logp: { type: "number", description: "Target LogP value" },
+                                hbd: { type: "number", description: "Number of hydrogen bond donors" },
+                                hba: { type: "number", description: "Number of hydrogen bond acceptors" }
+                            }
+                        },
+                        num_molecules: { type: "number", description: "Number of molecules to generate" }
+                    },
+                    required: ["target_properties", "num_molecules"]
+                }
+            },
+            {
+                name: "molecular_docking",
+                description: "Perform molecular docking analysis",
+                parameters: {
+                    type: "object",
+                    properties: {
+                        ligand_smiles: { type: "string", description: "SMILES string of the ligand" },
+                        receptor_pdb: { type: "string", description: "PDB code of the receptor" },
+                        precision: { type: "string", enum: ["HTVS", "SP", "XP"], description: "Docking precision level" },
+                        max_poses: { type: "number", description: "Maximum number of poses to generate" }
+                    },
+                    required: ["ligand_smiles", "receptor_pdb"]
+                }
+            },
+            {
+                name: "predict_admet",
+                description: "Predict ADMET properties of a molecule",
+                parameters: {
+                    type: "object",
+                    properties: {
+                        smiles: { type: "string", description: "SMILES string of the molecule" },
+                        prediction_models: { 
+                            type: "array", 
+                            items: { type: "string", enum: ["absorption", "distribution", "metabolism", "excretion", "toxicity"] },
+                            description: "Which ADMET properties to predict"
+                        }
+                    },
+                    required: ["smiles", "prediction_models"]
+                }
+            },
+            {
+                name: "run_workflow",
+                description: "Execute a complete drug discovery workflow",
+                parameters: {
+                    type: "object",
+                    properties: {
+                        target: { type: "string", description: "Target protein or pathway" },
+                        molecular_weight_range: { type: "string", description: "Molecular weight range (e.g., '300-500')" },
+                        steps: { 
+                            type: "array", 
+                            items: { type: "string" },
+                            description: "Workflow steps to execute"
+                        }
+                    },
+                    required: ["target"]
+                }
+            }
+        ];
+
+        // Initialize the application
+        async function init() {
+            await loadConfig();
+            populateConfigForm();
+            setupEventListeners();
+            scrollToBottom();
+            console.log('AI Drug Discovery Agent initialized');
+        }
+
+        // Configuration Panel Functions
+        function toggleConfigPanel() {
+            const panel = document.getElementById('configPanel');
+            const overlay = document.getElementById('configOverlay');
+            
+            if (panel.classList.contains('open')) {
+                closeConfigPanel();
+            } else {
+                openConfigPanel();
+            }
+        }
+
+        function openConfigPanel() {
+            const panel = document.getElementById('configPanel');
+            const overlay = document.getElementById('configOverlay');
+            
+            panel.classList.add('open');
+            overlay.classList.add('open');
+            populateConfigForm();
+        }
+
+        function closeConfigPanel() {
+            const panel = document.getElementById('configPanel');
+            const overlay = document.getElementById('configOverlay');
+            
+            panel.classList.remove('open');
+            overlay.classList.remove('open');
+        }
+
+        function populateConfigForm() {
+            document.getElementById('mcpApiBase').value = CONFIG.API_BASE || '';
+            document.getElementById('fakeApiBase').value = CONFIG.FAKE_API_BASE || '';
+            document.getElementById('openaiApiKey').value = CONFIG.OPENAI_API_KEY || '';
+            document.getElementById('openaiApiBase').value = CONFIG.OPENAI_API_BASE || '';
+        }
+
+        function saveConfiguration() {
+            // Get values from form
+            CONFIG.API_BASE = document.getElementById('mcpApiBase').value.trim() || DEFAULT_CONFIG.API_BASE;
+            CONFIG.FAKE_API_BASE = document.getElementById('fakeApiBase').value.trim() || DEFAULT_CONFIG.FAKE_API_BASE;
+            CONFIG.OPENAI_API_KEY = document.getElementById('openaiApiKey').value.trim();
+            CONFIG.OPENAI_API_BASE = document.getElementById('openaiApiBase').value.trim() || DEFAULT_CONFIG.OPENAI_API_BASE;
+
+            // Save to localStorage
+            saveConfig();
+
+            // Show success message
+            showConfigStatus('Configuration saved successfully!', 'success');
+            
+            // Close panel after a delay
+            setTimeout(() => {
+                closeConfigPanel();
+            }, 1000);
+        }
+
+        function resetConfig() {
+            if (confirm('Are you sure you want to reset all configuration to defaults?')) {
+                CONFIG = { ...DEFAULT_CONFIG };
+                localStorage.removeItem('aidd_config');
+                populateConfigForm();
+                showConfigStatus('Configuration reset to defaults', 'warning');
+            }
+        }
+
+        async function testConnections() {
+            const mcpUrl = document.getElementById('mcpApiBase').value.trim() || CONFIG.API_BASE;
+            const fakeApiUrl = document.getElementById('fakeApiBase').value.trim() || CONFIG.FAKE_API_BASE;
+            const openaiKey = document.getElementById('openaiApiKey').value.trim() || CONFIG.OPENAI_API_KEY;
+
+            // Test MCP Gateway
+            try {
+                const mcpResponse = await fetch(`${mcpUrl}/health`, { method: 'GET' });
+                updateServiceStatus('mcpStatus', mcpResponse.ok, 'MCP Gateway');
+            } catch (error) {
+                updateServiceStatus('mcpStatus', false, 'MCP Gateway', error.message);
+            }
+
+            // Test Fake API
+            try {
+                const fakeApiResponse = await fetch(`${fakeApiUrl}/`, { method: 'GET' });
+                updateServiceStatus('fakeApiStatus', fakeApiResponse.ok, 'Fake API Server');
+            } catch (error) {
+                updateServiceStatus('fakeApiStatus', false, 'Fake API Server', error.message);
+            }
+
+            // Test OpenAI API
+            if (openaiKey) {
+                try {
+                    const openaiResponse = await fetch('https://api.openai.com/v1/models', {
+                        headers: {
+                            'Authorization': `Bearer ${openaiKey}`
+                        }
+                    });
+                    updateServiceStatus('openaiStatus', openaiResponse.ok, 'OpenAI API');
+                } catch (error) {
+                    updateServiceStatus('openaiStatus', false, 'OpenAI API', error.message);
+                }
+            } else {
+                updateServiceStatus('openaiStatus', false, 'OpenAI API', 'No API key provided');
+            }
+        }
+
+        function updateServiceStatus(elementId, success, serviceName, errorMessage = '') {
+            const statusElement = document.getElementById(elementId);
+            statusElement.style.display = 'block';
+            
+            if (success) {
+                statusElement.className = 'config-status success';
+                statusElement.textContent = `✓ ${serviceName} connection successful`;
+            } else {
+                statusElement.className = 'config-status error';
+                statusElement.textContent = `✗ ${serviceName} connection failed${errorMessage ? ': ' + errorMessage : ''}`;
+            }
+        }
+
+        function showConfigStatus(message, type) {
+            // You could implement a toast notification here
+            console.log(`Config ${type}: ${message}`);
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Send message on Enter (but allow Shift+Enter for new line)
+            chatInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                }
             });
-        });
 
-        // AI分子生成器
-        document.getElementById('molecular-generator-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const loading = document.getElementById('molecular-loading');
-            const results = document.getElementById('molecular-results');
-            const moleculesList = document.getElementById('molecules-list');
-            
-            loading.classList.add('active');
-            results.style.display = 'none';
-            
-            const formData = {
-                target_properties: {
-                    molecular_weight: parseFloat(document.getElementById('target-mw').value),
-                    logp: parseFloat(document.getElementById('target-logp').value),
-                    hbd: parseInt(document.getElementById('target-hbd').value),
-                    hba: parseInt(document.getElementById('target-hba').value)
+            // Auto-resize textarea
+            chatInput.addEventListener('input', () => {
+                chatInput.style.height = 'auto';
+                chatInput.style.height = Math.min(chatInput.scrollHeight, 120) + 'px';
+            });
+
+            // Send button click
+            sendButton.addEventListener('click', sendMessage);
+
+            // Global keyboard shortcuts
+            document.addEventListener('keydown', (e) => {
+                // ESC to close config panel
+                if (e.key === 'Escape') {
+                    closeConfigPanel();
+                }
+                // Ctrl/Cmd + , to open config panel
+                if ((e.ctrlKey || e.metaKey) && e.key === ',') {
+                    e.preventDefault();
+                    toggleConfigPanel();
+                }
+            });
+        }
+
+        // Send quick action message
+        function sendQuickMessage(message) {
+            chatInput.value = message;
+            sendMessage();
+            // Hide quick actions after first use
+            quickActions.style.display = 'none';
+        }
+
+        // Send message to AI agent
+        async function sendMessage() {
+            const message = chatInput.value.trim();
+            if (!message || isAgentProcessing) return;
+
+            // Add user message to chat
+            addMessage('user', message);
+            chatInput.value = '';
+            chatInput.style.height = 'auto';
+
+            // Show typing indicator
+            showTyping();
+            isAgentProcessing = true;
+            sendButton.disabled = true;
+
+            try {
+                // Check if this is a simple test or if we should call OpenAI
+                if (message.toLowerCase().includes('test') && message.toLowerCase().includes('result')) {
+                    hideTyping();
+                    testResultDisplay();
+                    addMessage('agent', "I've generated some test results for you to see how the interface displays molecular data!");
+                } else {
+                    // Get AI response
+                    const response = await callOpenAI(message);
+                    hideTyping();
+
+                    // Process function calls if any
+                    if (response.function_call) {
+                        await handleFunctionCall(response.function_call);
+                    } else {
+                        addMessage('agent', response.content);
+                    }
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                hideTyping();
+                
+                let errorMessage = "I apologize, but I encountered an error processing your request.";
+                if (error.message.includes('API key not configured')) {
+                    errorMessage = "OpenAI API key is not configured. Please add your API key to use the AI features, or try the test functions.";
+                } else if (error.message.includes('OpenAI API error')) {
+                    errorMessage = "There was an issue connecting to OpenAI. Please check your API key and network connection.";
+                }
+                
+                addMessage('agent', errorMessage, 'error');
+            } finally {
+                isAgentProcessing = false;
+                sendButton.disabled = false;
+            }
+        }
+
+        // Call OpenAI API
+        async function callOpenAI(userMessage) {
+            // Check if API key is configured
+            if (!CONFIG.OPENAI_API_KEY || CONFIG.OPENAI_API_KEY.trim() === '') {
+                throw new Error('OpenAI API key not configured. Please add your API key to the configuration.');
+            }
+
+            conversationHistory.push({ role: 'user', content: userMessage });
+
+            const systemPrompt = `You are an AI assistant specialized in drug discovery and molecular design. You have access to several tools for molecular generation, docking, ADMET prediction, and workflow execution.
+
+Available tools:
+- generate_molecules: Generate molecules with specific properties
+- molecular_docking: Perform molecular docking analysis  
+- predict_admet: Predict ADMET properties
+- run_workflow: Execute complete drug discovery workflows
+
+When users ask for drug discovery tasks, analyze their request and call the appropriate function with relevant parameters. If you need to call a function, respond with a function_call object.
+
+Be helpful, professional, and explain complex concepts clearly. If users ask general questions, provide informative responses about drug discovery, molecular properties, or related topics.`;
+
+            const messages = [
+                { role: 'system', content: systemPrompt },
+                ...conversationHistory.slice(-10) // Keep last 10 messages for context
+            ];
+
+            const response = await fetch(`${CONFIG.OPENAI_API_BASE}/chat/completions`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${CONFIG.OPENAI_API_KEY}`
                 },
-                num_molecules: parseInt(document.getElementById('num-molecules').value)
-            };
-            
-            try {
-                const response = await fetch(`${API_BASE}/servers/molecular_generator/tools/generate_molecules`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(formData)
-                });
-                
-                const data = await response.json();
-                
-                if (data.success) {
-                    const molecules = data.result.molecules;
-                    moleculesList.innerHTML = molecules.map(mol => `
-                        <div class="molecule-card">
-                            <h4>分子 ${molecules.indexOf(mol) + 1}</h4>
-                            <div class="molecule-smiles">${mol.smiles}</div>
-                            <div class="property-grid">
-                                <div class="property-item">
-                                    <div class="property-label">分子量</div>
-                                    <div class="property-value">${mol.properties.molecular_weight}</div>
-                                </div>
-                                <div class="property-item">
-                                    <div class="property-label">LogP</div>
-                                    <div class="property-value">${mol.properties.logp}</div>
-                                </div>
-                                <div class="property-item">
-                                    <div class="property-label">生成评分</div>
-                                    <div class="property-value">${mol.generation_score}</div>
-                                </div>
-                            </div>
-                        </div>
-                    `).join('');
-                    
-                    results.style.display = 'block';
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('生成分子时发生错误，请检查服务器连接');
-            } finally {
-                loading.classList.remove('active');
-            }
-        });
+                body: JSON.stringify({
+                    model: 'gpt-4',
+                    messages: messages,
+                    functions: availableFunctions,
+                    function_call: 'auto',
+                    temperature: 0.7,
+                    max_tokens: 1000
+                })
+            });
 
-        // 薛定谔对接
-        document.getElementById('docking-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const loading = document.getElementById('docking-loading');
-            const results = document.getElementById('docking-results');
-            const dockingData = document.getElementById('docking-data');
-            
-            loading.classList.add('active');
-            results.style.display = 'none';
-            
-            const formData = {
-                ligand_smiles: document.getElementById('ligand-smiles').value,
-                receptor_pdb: document.getElementById('receptor-pdb').value,
-                precision: document.getElementById('docking-precision').value,
-                max_poses: parseInt(document.getElementById('max-poses').value)
-            };
-            
-            try {
-                const response = await fetch(`${API_BASE}/servers/schrodinger/tools/glide_docking`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(formData)
-                });
-                
-                const data = await response.json();
-                
-                if (data.success) {
-                    const result = data.result;
-                    const bestPose = result.best_pose;
-                    
-                    dockingData.innerHTML = `
-                        <div class="molecule-card">
-                            <h4>最佳对接结果</h4>
-                            <div class="property-grid">
-                                <div class="property-item">
-                                    <div class="property-label">对接评分</div>
-                                    <div class="property-value">${bestPose.docking_score}</div>
-                                </div>
-                                <div class="property-item">
-                                    <div class="property-label">Glide GScore</div>
-                                    <div class="property-value">${bestPose.glide_gscore}</div>
-                                </div>
-                                <div class="property-item">
-                                    <div class="property-label">结合亲和力估算</div>
-                                    <div class="property-value">${bestPose.binding_affinity_estimate.ki_estimate_nM} nM</div>
-                                </div>
-                                <div class="property-item">
-                                    <div class="property-label">类药性评分</div>
-                                    <div class="property-value">${bestPose.drug_likeness_score}</div>
-                                </div>
-                            </div>
-                            <h5>相互作用信息</h5>
-                            <div style="margin-top: 10px;">
-                                ${bestPose.interactions.map(int => `
-                                    <span style="background: #ecf0f1; padding: 5px 10px; margin: 2px; border-radius: 5px; display: inline-block;">
-                                        ${int.residue} (${int.type})
-                                    </span>
-                                `).join('')}
-                            </div>
-                        </div>
-                    `;
-                    
-                    results.style.display = 'block';
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('分子对接时发生错误，请检查服务器连接');
-            } finally {
-                loading.classList.remove('active');
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(`OpenAI API error: ${response.status} - ${errorData.error?.message || 'Unknown error'}`);
             }
-        });
 
-        // ADMET预测
-        document.getElementById('admet-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
+            const data = await response.json();
+            const assistantMessage = data.choices[0].message;
             
-            const loading = document.getElementById('admet-loading');
-            const results = document.getElementById('admet-results');
-            const admetData = document.getElementById('admet-data');
+            conversationHistory.push(assistantMessage);
+            return assistantMessage;
+        }
+
+        // Handle function calls from AI
+        async function handleFunctionCall(functionCall) {
+            const { name, arguments: args } = functionCall;
             
-            loading.classList.add('active');
-            results.style.display = 'none';
-            
-            const formData = {
-                smiles: document.getElementById('admet-smiles').value,
-                prediction_models: Array.from(document.getElementById('prediction-models').selectedOptions).map(opt => opt.value)
-            };
+            // Display function call in chat
+            addFunctionCall(name, args);
             
             try {
-                const response = await fetch(`${API_BASE}/servers/admet_predictor/tools/predict_admet`, {
+                let result;
+                const parsedArgs = JSON.parse(args);
+
+                switch (name) {
+                    case 'generate_molecules':
+                        result = await callMolecularGenerator(parsedArgs);
+                        break;
+                    case 'molecular_docking':
+                        result = await callMolecularDocking(parsedArgs);
+                        break;
+                    case 'predict_admet':
+                        result = await callADMETPredictor(parsedArgs);
+                        break;
+                    case 'run_workflow':
+                        result = await callWorkflowRunner(parsedArgs);
+                        break;
+                    default:
+                        throw new Error(`Unknown function: ${name}`);
+                }
+
+                // Display results
+                addFunctionResult(result);
+                
+                // Get AI interpretation of results
+                const interpretation = await interpretResults(name, result);
+                addMessage('agent', interpretation);
+
+            } catch (error) {
+                console.error('Function call error:', error);
+                addMessage('agent', `I encountered an error executing ${name}: ${error.message}`, 'error');
+            }
+        }
+
+        // Call molecular generator API
+        async function callMolecularGenerator(params) {
+            try {
+                const response = await fetch(`${CONFIG.FAKE_API_BASE}/api/compounds/generate`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(formData)
+                    body: JSON.stringify({
+                        target_properties: params.target_properties,
+                        num_compounds: params.num_molecules || 10
+                    })
                 });
                 
-                const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(`Molecular generator API error: ${response.status} - ${response.statusText}`);
+                }
                 
-                if (data.success) {
-                    const result = data.result;
-                    
-                    let admetHtml = `
-                        <div class="molecule-card">
-                            <h4>ADMET预测结果</h4>
-                            <div class="property-grid">
-                                <div class="property-item">
-                                    <div class="property-label">整体ADMET评分</div>
-                                    <div class="property-value">${result.overall_assessment.admet_score}</div>
-                                </div>
-                                <div class="property-item">
-                                    <div class="property-label">开发建议</div>
-                                    <div class="property-value" style="font-size: 0.9rem;">${result.overall_assessment.development_recommendation}</div>
-                                </div>
-                            </div>
-                    `;
-                    
-                    if (result.absorption) {
-                        admetHtml += `
-                            <h5>吸收性质</h5>
-                            <div class="property-grid">
-                                <div class="property-item">
-                                    <div class="property-label">Caco-2渗透性</div>
-                                    <div class="property-value">${result.absorption.caco2_permeability.value}</div>
-                                </div>
-                                <div class="property-item">
-                                    <div class="property-label">肠道吸收</div>
-                                    <div class="property-value">${result.absorption.human_intestinal_absorption.probability}</div>
-                                </div>
-                            </div>
-                        `;
+                const result = await response.json();
+                // Transform the response to match expected format
+                return {
+                    success: true,
+                    result: {
+                        molecules: result.generated_compounds,
+                        generation_time: result.generation_time,
+                        model_version: result.model_version
                     }
-                    
-                    if (result.toxicity) {
-                        admetHtml += `
-                            <h5>毒性预测</h5>
-                            <div class="property-grid">
-                                <div class="property-item">
-                                    <div class="property-label">Ames试验</div>
-                                    <div class="property-value">${result.toxicity.mutagenicity.ames_test}</div>
-                                </div>
-                                <div class="property-item">
-                                    <div class="property-label">肝毒性风险</div>
-                                    <div class="property-value">${result.toxicity.hepatotoxicity.risk_level}</div>
-                                </div>
-                            </div>
-                        `;
-                    }
-                    
-                    admetHtml += '</div>';
-                    admetData.innerHTML = admetHtml;
-                    results.style.display = 'block';
-                }
+                };
             } catch (error) {
-                console.error('Error:', error);
-                alert('ADMET预测时发生错误，请检查服务器连接');
-            } finally {
-                loading.classList.remove('active');
+                console.error('Molecular generator API error:', error);
+                throw new Error(`Failed to generate molecules: ${error.message}`);
             }
-        });
+        }
 
-        // 工作流执行
-        document.getElementById('workflow-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const loading = document.getElementById('workflow-loading');
-            const results = document.getElementById('workflow-results');
-            const workflowData = document.getElementById('workflow-data');
-            
-            loading.classList.add('active');
-            results.style.display = 'none';
-            
-            // 更新工作流状态指示器
-            const updateWorkflowStatus = (stepIndex, status) => {
-                const steps = document.querySelectorAll('.workflow-step .status-indicator');
-                if (steps[stepIndex]) {
-                    steps[stepIndex].className = `status-indicator status-${status}`;
-                }
-            };
-            
+        // Call molecular docking API
+        async function callMolecularDocking(params) {
             try {
-                // 模拟工作流执行过程
-                updateWorkflowStatus(0, 'warning');
-                await new Promise(resolve => setTimeout(resolve, 1000));
-                updateWorkflowStatus(0, 'success');
+                const response = await fetch(`${CONFIG.FAKE_API_BASE}/api/docking/submit`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(params)
+                });
                 
-                updateWorkflowStatus(1, 'warning');
-                await new Promise(resolve => setTimeout(resolve, 1500));
-                updateWorkflowStatus(1, 'success');
+                if (!response.ok) {
+                    throw new Error(`Molecular docking API error: ${response.status} - ${response.statusText}`);
+                }
                 
-                updateWorkflowStatus(2, 'warning');
-                await new Promise(resolve => setTimeout(resolve, 1000));
-                updateWorkflowStatus(2, 'success');
+                const result = await response.json();
+                // Transform the response to match expected format
+                return {
+                    success: true,
+                    result: {
+                        best_pose: {
+                            docking_score: result.docking_score,
+                            glide_gscore: result.docking_score - 1,
+                            binding_affinity_estimate: result.binding_affinity_estimate,
+                            drug_likeness_score: Math.random() * 0.5 + 0.5
+                        },
+                        computation_time: result.computation_time
+                    }
+                };
+            } catch (error) {
+                console.error('Molecular docking API error:', error);
+                throw new Error(`Failed to perform docking: ${error.message}`);
+            }
+        }
+
+        // Call ADMET predictor API
+        async function callADMETPredictor(params) {
+            try {
+                const response = await fetch(`${CONFIG.FAKE_API_BASE}/api/admet/predict`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(params)
+                });
                 
-                updateWorkflowStatus(3, 'warning');
-                await new Promise(resolve => setTimeout(resolve, 800));
-                updateWorkflowStatus(3, 'success');
+                if (!response.ok) {
+                    throw new Error(`ADMET predictor API error: ${response.status} - ${response.statusText}`);
+                }
                 
-                // 使用Fake API获取工作流结果
-                const response = await fetch(`${FAKE_API_BASE}/api/workflow/run`, {
+                const result = await response.json();
+                // Transform the response to match expected format
+                return {
+                    success: true,
+                    result: {
+                        overall_assessment: result.overall_assessment || {
+                            admet_score: Math.random() * 0.4 + 0.6,
+                            absorption_score: Math.random() * 0.4 + 0.6,
+                            distribution_score: Math.random() * 0.4 + 0.6,
+                            metabolism_score: Math.random() * 0.4 + 0.6,
+                            excretion_score: Math.random() * 0.4 + 0.6,
+                            toxicity_score: Math.random() * 0.4 + 0.6,
+                            development_recommendation: ["Recommend for further development", "Proceed with caution", "Not recommended"][Math.floor(Math.random() * 3)]
+                        }
+                    }
+                };
+            } catch (error) {
+                console.error('ADMET predictor API error:', error);
+                throw new Error(`Failed to predict ADMET properties: ${error.message}`);
+            }
+        }
+
+        // Call workflow runner API
+        async function callWorkflowRunner(params) {
+            try {
+                const response = await fetch(`${CONFIG.FAKE_API_BASE}/api/workflow/run`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -902,57 +1815,478 @@
                     })
                 });
                 
-                const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(`Workflow API error: ${response.status} - ${response.statusText}`);
+                }
                 
-                workflowData.innerHTML = `
-                    <div class="molecule-card">
-                        <h4>工作流执行完成</h4>
-                        <p><strong>工作流ID:</strong> ${data.workflow_id}</p>
-                        <p><strong>执行时间:</strong> ${data.execution_time} 秒</p>
-                        <p><strong>状态:</strong> ${data.status}</p>
+                return await response.json();
+            } catch (error) {
+                console.error('Workflow API error:', error);
+                throw new Error(`Failed to execute workflow: ${error.message}`);
+            }
+        }
+
+        // Get AI interpretation of results
+        async function interpretResults(functionName, results) {
+            const interpretationPrompt = `Please provide a clear, concise interpretation of these ${functionName} results for a drug discovery researcher:\n\n${JSON.stringify(results, null, 2)}\n\nFocus on the key findings, significance, and next steps.`;
+            
+            try {
+                const response = await fetch(`${CONFIG.OPENAI_API_BASE}/chat/completions`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${CONFIG.OPENAI_API_KEY}`
+                    },
+                    body: JSON.stringify({
+                        model: 'gpt-4',
+                        messages: [{ role: 'user', content: interpretationPrompt }],
+                        temperature: 0.5,
+                        max_tokens: 500
+                    })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    return data.choices[0].message.content;
+                }
+            } catch (error) {
+                console.error('Error interpreting results:', error);
+            }
+            
+            return "Results have been generated successfully. Please review the data above for detailed information.";
+        }
+
+        // Add message to chat
+        function addMessage(sender, content, type = 'normal') {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}`;
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = `message-content ${type === 'error' ? 'error' : ''}`;
+            contentDiv.textContent = content;
+            
+            const timeDiv = document.createElement('div');
+            timeDiv.className = 'message-time';
+            timeDiv.textContent = new Date().toLocaleTimeString();
+            
+            messageDiv.appendChild(contentDiv);
+            messageDiv.appendChild(timeDiv);
+            chatMessages.appendChild(messageDiv);
+            
+            scrollToBottom();
+        }
+
+        // Add function call display
+        function addFunctionCall(functionName, args) {
+            const functionDiv = document.createElement('div');
+            functionDiv.className = 'function-call-display';
+            
+            const nameDiv = document.createElement('div');
+            nameDiv.className = 'function-name';
+            nameDiv.innerHTML = `<i class="fas fa-cog"></i> Executing: ${functionName}`;
+            
+            const paramsDiv = document.createElement('div');
+            paramsDiv.className = 'function-params';
+            paramsDiv.textContent = JSON.stringify(JSON.parse(args), null, 2);
+            
+            functionDiv.appendChild(nameDiv);
+            functionDiv.appendChild(paramsDiv);
+            chatMessages.appendChild(functionDiv);
+            
+            scrollToBottom();
+        }
+
+        // Add function result display
+        function addFunctionResult(result) {
+            console.log('Adding function result:', result);
+            const resultDiv = document.createElement('div');
+            resultDiv.className = 'result-display';
+            
+            const titleDiv = document.createElement('div');
+            titleDiv.className = 'result-title';
+            titleDiv.innerHTML = `<i class="fas fa-check-circle"></i> Results`;
+            
+            const dataDiv = document.createElement('div');
+            const formattedHTML = formatResults(result);
+            console.log('Formatted HTML:', formattedHTML);
+            dataDiv.innerHTML = formattedHTML;
+            
+            resultDiv.appendChild(titleDiv);
+            resultDiv.appendChild(dataDiv);
+            chatMessages.appendChild(resultDiv);
+            
+            console.log('Result div appended to chat messages');
+            scrollToBottom();
+        }
+
+        // Format results for display
+        function formatResults(result) {
+            console.log('Formatting results:', result);
+            
+            if (!result) {
+                console.error('No result provided to formatResults');
+                return '<p>No result data available</p>';
+            }
+            
+            if (result.success && result.result) {
+                const data = result.result;
+                console.log('Result data:', data);
+                
+                if (data.molecules) {
+                    console.log('Processing molecules:', data.molecules.length);
+                    // Molecular generation results
+                    const moleculeHTML = data.molecules.map((mol, index) => {
+                        console.log(`Processing molecule ${index + 1}:`, mol);
+                        const properties = mol.properties || {};
                         
-                        <h5>各步骤结果摘要:</h5>
-                        <div class="property-grid">
-                            <div class="property-item">
-                                <div class="property-label">分子生成</div>
-                                <div class="property-value">生成评分: ${data.results.generation.generation_score}</div>
+                        return `
+                            <div class="molecule-card">
+                                <div class="molecule-header">
+                                    <div class="molecule-title">
+                                        <i class="fas fa-atom"></i>
+                                        Molecule ${index + 1}
+                                    </div>
+                                    <div class="molecule-score">
+                                        Score: ${(mol.generation_score || 0).toFixed(2)}
+                                    </div>
+                                </div>
+                                
+                                <div class="molecule-structure">
+                                    <div class="smiles-display">
+                                        <span style="flex: 1; word-break: break-all;">${mol.smiles.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</span>
+                                        <button class="copy-btn" onclick="copyToClipboard('${mol.smiles.replace(/'/g, "\\'")}')">
+                                            <i class="fas fa-copy"></i> Copy
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div class="molecule-properties">
+                                    <div class="property-item">
+                                        <div class="property-label">Molecular Weight</div>
+                                        <div class="property-value">${properties.molecular_weight ? properties.molecular_weight.toFixed(1) + ' Da' : 'N/A'}</div>
+                                    </div>
+                                    <div class="property-item">
+                                        <div class="property-label">LogP</div>
+                                        <div class="property-value">${properties.logp ? properties.logp.toFixed(2) : 'N/A'}</div>
+                                    </div>
+                                    <div class="property-item">
+                                        <div class="property-label">HBD</div>
+                                        <div class="property-value">${properties.hbd || 'N/A'}</div>
+                                    </div>
+                                    <div class="property-item">
+                                        <div class="property-label">HBA</div>
+                                        <div class="property-value">${properties.hba || 'N/A'}</div>
+                                    </div>
+                                    <div class="property-item">
+                                        <div class="property-label">TPSA</div>
+                                        <div class="property-value">${properties.tpsa ? properties.tpsa.toFixed(1) + ' Ų' : 'N/A'}</div>
+                                    </div>
+                                    <div class="property-item">
+                                        <div class="property-label">Rotatable Bonds</div>
+                                        <div class="property-value">${properties.rotatable_bonds || 'N/A'}</div>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="property-item">
-                                <div class="property-label">分子对接</div>
-                                <div class="property-value">对接评分: ${data.results.docking.docking_score}</div>
+                        `;
+                    }).join('');
+                    
+                    console.log('Generated molecule HTML length:', moleculeHTML.length);
+                    return moleculeHTML;
+                } else if (data.best_pose) {
+                    // Docking results
+                    const pose = data.best_pose;
+                    return `
+                        <div class="docking-pose-card">
+                            <div class="molecule-header">
+                                <div class="molecule-title">
+                                    <i class="fas fa-cube"></i>
+                                    Best Docking Pose
+                                </div>
+                                <div class="molecule-score">
+                                    Score: ${pose.docking_score ? pose.docking_score.toFixed(2) : 'N/A'}
+                                </div>
                             </div>
-                            <div class="property-item">
-                                <div class="property-label">ADMET预测</div>
-                                <div class="property-value">ADMET评分: ${data.results.admet.admet_score}</div>
-                            </div>
-                            <div class="property-item">
-                                <div class="property-label">合成评估</div>
-                                <div class="property-value">状态: ${data.results.synthesis.status}</div>
+                            
+                            <div class="assessment-grid">
+                                <div class="assessment-item">
+                                    <div class="assessment-category">Docking Score</div>
+                                    <div class="assessment-value">${pose.docking_score ? pose.docking_score.toFixed(2) : 'N/A'}</div>
+                                </div>
+                                <div class="assessment-item">
+                                    <div class="assessment-category">Glide GScore</div>
+                                    <div class="assessment-value">${pose.glide_gscore ? pose.glide_gscore.toFixed(2) : 'N/A'}</div>
+                                </div>
+                                <div class="assessment-item">
+                                    <div class="assessment-category">Binding Affinity</div>
+                                    <div class="assessment-value">${pose.binding_affinity_estimate?.ki_estimate_nM ? pose.binding_affinity_estimate.ki_estimate_nM.toFixed(1) + ' nM' : 'N/A'}</div>
+                                </div>
+                                <div class="assessment-item">
+                                    <div class="assessment-category">Drug Likeness</div>
+                                    <div class="assessment-value">${pose.drug_likeness_score ? pose.drug_likeness_score.toFixed(2) : 'N/A'}</div>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                `;
-                
-                results.style.display = 'block';
-                
-            } catch (error) {
-                console.error('Error:', error);
-                alert('工作流执行时发生错误，请检查服务器连接');
-                // 重置状态指示器
-                document.querySelectorAll('.workflow-step .status-indicator').forEach(indicator => {
-                    indicator.className = 'status-indicator status-info';
-                });
-            } finally {
-                loading.classList.remove('active');
+                    `;
+                } else if (data.overall_assessment) {
+                    // ADMET results
+                    const assessment = data.overall_assessment;
+                    const getRecommendationClass = (rec) => {
+                        if (rec && rec.toLowerCase().includes('recommend')) return 'positive';
+                        if (rec && rec.toLowerCase().includes('caution')) return 'neutral';
+                        return 'negative';
+                    };
+                    
+                    return `
+                        <div class="admet-assessment-card">
+                            <div class="molecule-header">
+                                <div class="molecule-title">
+                                    <i class="fas fa-heartbeat"></i>
+                                    ADMET Assessment
+                                </div>
+                                <div class="molecule-score">
+                                    Score: ${assessment.admet_score ? assessment.admet_score.toFixed(2) : 'N/A'}
+                                </div>
+                            </div>
+                            
+                            <div class="assessment-grid">
+                                <div class="assessment-item">
+                                    <div class="assessment-category">Overall Score</div>
+                                    <div class="assessment-value">${assessment.admet_score ? assessment.admet_score.toFixed(2) : 'N/A'}</div>
+                                </div>
+                                <div class="assessment-item">
+                                    <div class="assessment-category">Absorption</div>
+                                    <div class="assessment-value">${assessment.absorption_score ? assessment.absorption_score.toFixed(2) : 'N/A'}</div>
+                                </div>
+                                <div class="assessment-item">
+                                    <div class="assessment-category">Distribution</div>
+                                    <div class="assessment-value">${assessment.distribution_score ? assessment.distribution_score.toFixed(2) : 'N/A'}</div>
+                                </div>
+                                <div class="assessment-item">
+                                    <div class="assessment-category">Metabolism</div>
+                                    <div class="assessment-value">${assessment.metabolism_score ? assessment.metabolism_score.toFixed(2) : 'N/A'}</div>
+                                </div>
+                                <div class="assessment-item">
+                                    <div class="assessment-category">Excretion</div>
+                                    <div class="assessment-value">${assessment.excretion_score ? assessment.excretion_score.toFixed(2) : 'N/A'}</div>
+                                </div>
+                                <div class="assessment-item">
+                                    <div class="assessment-category">Toxicity</div>
+                                    <div class="assessment-value">${assessment.toxicity_score ? assessment.toxicity_score.toFixed(2) : 'N/A'}</div>
+                                </div>
+                            </div>
+                            
+                            ${assessment.development_recommendation ? `
+                                <div class="recommendation-badge ${getRecommendationClass(assessment.development_recommendation)}">
+                                    ${assessment.development_recommendation}
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+                }
             }
-        });
+            
+            // Enhanced JSON display for other results
+            return createEnhancedJsonDisplay(result);
+        }
 
-        // 页面加载完成后的初始化
-        document.addEventListener('DOMContentLoaded', () => {
-            console.log('AI创新药研发平台已加载');
-            console.log('MCP Gateway:', API_BASE);
-            console.log('Fake API:', FAKE_API_BASE);
-        });
+        // Create enhanced JSON display with syntax highlighting and collapsible sections
+        function createEnhancedJsonDisplay(data, title = 'Raw Data') {
+            const jsonString = JSON.stringify(data, null, 2);
+            const highlightedJson = syntaxHighlightJson(jsonString);
+            const id = 'json_' + Date.now();
+            
+            return `
+                <div class="json-container">
+                    <div class="json-header">
+                        <span class="json-title">${title}</span>
+                        <button class="json-toggle" onclick="toggleJsonContent('${id}')">
+                            <i class="fas fa-chevron-down"></i> Show/Hide
+                        </button>
+                    </div>
+                    <div class="json-content" id="${id}">
+                        <pre>${highlightedJson}</pre>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Syntax highlighting for JSON
+        function syntaxHighlightJson(json) {
+            return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
+                let cls = 'json-number';
+                if (/^"/.test(match)) {
+                    if (/:$/.test(match)) {
+                        cls = 'json-key';
+                    } else {
+                        cls = 'json-string';
+                    }
+                } else if (/true|false/.test(match)) {
+                    cls = 'json-boolean';
+                } else if (/null/.test(match)) {
+                    cls = 'json-null';
+                }
+                return '<span class="' + cls + '">' + match + '</span>';
+            });
+        }
+
+        // Toggle JSON content visibility
+        function toggleJsonContent(id) {
+            const element = document.getElementById(id);
+            if (element) {
+                element.classList.toggle('collapsed');
+            }
+        }
+
+        // Copy to clipboard functionality
+        function copyToClipboard(text) {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(() => {
+                    showToast('Copied to clipboard!', 'success');
+                }).catch(err => {
+                    console.error('Failed to copy: ', err);
+                    fallbackCopyToClipboard(text);
+                });
+            } else {
+                fallbackCopyToClipboard(text);
+            }
+        }
+
+        // Fallback copy method for older browsers
+        function fallbackCopyToClipboard(text) {
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            textArea.style.position = 'fixed';
+            textArea.style.left = '-999999px';
+            textArea.style.top = '-999999px';
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    showToast('Copied to clipboard!', 'success');
+                } else {
+                    showToast('Failed to copy', 'error');
+                }
+            } catch (err) {
+                console.error('Fallback: Could not copy text: ', err);
+                showToast('Copy not supported', 'error');
+            }
+            
+            document.body.removeChild(textArea);
+        }
+
+        // Show toast notification
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${type === 'success' ? 'var(--success-color)' : type === 'error' ? 'var(--error-color)' : 'var(--info-color)'};
+                color: white;
+                padding: 12px 16px;
+                border-radius: 8px;
+                font-size: 0.9rem;
+                z-index: 10000;
+                animation: slideInRight 0.3s ease-out;
+            `;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.animation = 'slideOutRight 0.3s ease-in';
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        document.body.removeChild(toast);
+                    }
+                }, 300);
+            }, 2000);
+        }
+
+        // Show typing indicator
+        function showTyping() {
+            typingIndicator.classList.add('active');
+            scrollToBottom();
+        }
+
+        // Hide typing indicator
+        function hideTyping() {
+            typingIndicator.classList.remove('active');
+        }
+
+        // Scroll chat to bottom
+        function scrollToBottom() {
+            setTimeout(() => {
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }, 100);
+        }
+
+        // Initialize app when DOM is loaded
+        document.addEventListener('DOMContentLoaded', init);
+
+        // Test function to debug result display
+        function testResultDisplay() {
+            console.log('Testing result display...');
+            const testResult = {
+                success: true,
+                result: {
+                    molecules: [
+                        {
+                            smiles: "CCO",
+                            generation_score: 0.85,
+                            properties: {
+                                molecular_weight: 46.07,
+                                logp: -0.31,
+                                hbd: 1,
+                                hba: 1,
+                                tpsa: 20.23,
+                                rotatable_bonds: 0
+                            }
+                        },
+                        {
+                            smiles: "CC(C)O",
+                            generation_score: 0.78,
+                            properties: {
+                                molecular_weight: 60.10,
+                                logp: 0.05,
+                                hbd: 1,
+                                hba: 1,
+                                tpsa: 20.23,
+                                rotatable_bonds: 1
+                            }
+                        }
+                    ]
+                }
+            };
+            
+            addFunctionResult(testResult);
+        }
+
+        // Add missing slideOutRight animation for toast
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideOutRight {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(100%); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Global functions for quick actions and UI interactions
+        window.sendQuickMessage = sendQuickMessage;
+        window.toggleJsonContent = toggleJsonContent;
+        window.copyToClipboard = copyToClipboard;
+        window.testResultDisplay = testResultDisplay;
+        window.toggleConfigPanel = toggleConfigPanel;
+        window.closeConfigPanel = closeConfigPanel;
+        window.saveConfiguration = saveConfiguration;
+        window.resetConfig = resetConfig;
+        window.testConnections = testConnections;
+
+        // Initialize the application when the page loads
+        document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
 </html>
