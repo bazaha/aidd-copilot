@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  ai-drug-discovery:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ai-drug-discovery-agent
+    ports:
+      - "8080:8080"   # Web Interface
+      - "8088:8088"   # MCP Gateway
+      - "8288:8288"   # Fake API Server
+    environment:
+      - PYTHONPATH=/app
+      - FLASK_ENV=production
+      - FASTAPI_ENV=production
+      - MCP_PORT=8088
+      - FAKE_API_PORT=8288
+      - WEB_PORT=8080
+      - LOG_LEVEL=INFO
+    volumes:
+      - ./logs:/app/logs
+      - ./tmp:/app/tmp
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8088/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    networks:
+      - ai-drug-network
+
+  # Optional: Add a reverse proxy for production deployment
+  nginx:
+    image: nginx:alpine
+    container_name: ai-drug-discovery-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - ai-drug-discovery
+    restart: unless-stopped
+    networks:
+      - ai-drug-network
+    profiles:
+      - production
+
+networks:
+  ai-drug-network:
+    driver: bridge

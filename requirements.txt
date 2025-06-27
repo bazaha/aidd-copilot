@@ -26,3 +26,6 @@ flake8>=6.0.0
 
 # Additional utilities
 python-dotenv>=1.0.0
+
+# Docker health checks and utilities
+psutil>=5.9.0

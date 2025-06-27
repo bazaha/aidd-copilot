@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  ai-drug-discovery-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ai-drug-discovery-dev
+    ports:
+      - "8080:8080"   # Web Interface
+      - "8088:8088"   # MCP Gateway
+      - "8288:8288"   # Fake API Server
+    environment:
+      - PYTHONPATH=/app
+      - FLASK_ENV=development
+      - FLASK_DEBUG=true
+      - FASTAPI_ENV=development
+      - MCP_PORT=8088
+      - FAKE_API_PORT=8288
+      - WEB_PORT=8080
+      - LOG_LEVEL=DEBUG
+    volumes:
+      # Mount source code for live editing (excluding venv)
+      - .:/app
+      - /app/venv
+      - /app/__pycache__
+      - /app/mcp_servers/__pycache__
+      # Persistent volumes
+      - ./logs:/app/logs
+      - ./tmp:/app/tmp
+    restart: unless-stopped
+    command: ["python3", "docker_start.py"]
+    networks:
+      - ai-drug-network-dev
+
+networks:
+  ai-drug-network-dev:
+    driver: bridge

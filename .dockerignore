@@ -1,0 +1,116 @@
+# Docker ignore file for AI Drug Discovery Agent
+# Exclude files and directories that shouldn't be in the Docker image
+
+# Git
+.git/
+.gitignore
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs and runtime files
+logs/
+*.log
+pids/
+*.pid
+
+# Temporary files
+tmp/
+temp/
+.tmp/
+
+# Documentation
+*.md
+docs/
+DEMO_GUIDE.md
+DEPLOYMENT.md
+DELIVERY_CHECKLIST.md
+test_report.md
+
+# Deployment scripts (not needed inside container)
+deploy.sh
+quick-deploy.sh
+stop-services.sh
+
+# Docker files (not needed inside container)
+Dockerfile
+docker-compose.yml
+docker-deploy.sh
+.dockerignore
+
+# Backup files
+backup_*/
+*.backup
+
+# SSL certificates (should be mounted as volumes)
+ssl/
+*.pem
+*.key
+*.crt
+
+# Environment files with secrets
+.env
+.env.local
+.env.production
+
+# Test files
+test/
+tests/
+pytest.ini
+.pytest_cache/
+
+# Coverage reports
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+
+# Jupyter Notebooks
+.ipynb_checkpoints/
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Cache directories
+.cache/
+.mypy_cache/
+.pytest_cache/

@@ -192,3 +192,55 @@ For production deployment:
 3. Configure SSL/TLS certificates
 4. Set up monitoring and logging
 5. Use environment-specific configuration files
+
+## Docker Deployment (Recommended)
+
+For containerized deployment using Docker:
+
+### Quick Start with Docker
+```bash
+# Make script executable
+chmod +x docker-deploy.sh
+
+# Build and start all services
+./docker-deploy.sh build && ./docker-deploy.sh start
+```
+
+### Docker Compose
+```bash
+# Start all services
+docker-compose up -d
+
+# Stop services
+docker-compose down
+```
+
+### Docker Commands
+```bash
+# Build Docker image
+./docker-deploy.sh build
+
+# Start services
+./docker-deploy.sh start
+
+# View logs
+./docker-deploy.sh logs
+
+# Production mode with nginx
+./docker-deploy.sh prod
+
+# Development mode
+./docker-deploy.sh dev
+
+# Clean up
+./docker-deploy.sh cleanup
+```
+
+**Access URLs (Docker):**
+- Web Interface: http://localhost:8080
+- MCP Gateway: http://localhost:8088
+- Fake API: http://localhost:8288
+
+For detailed Docker deployment instructions, see [DOCKER_README.md](DOCKER_README.md).
+
+---
